@@ -1,0 +1,66 @@
+{
+  "name": "proj",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "application",
+  "sourceRoot": "apps/proj/proj",
+  "targets": {
+    "lock": {
+      "executor": "@pymonorepo/nx-python:run-commands",
+      "options": {
+        "command": "poetry lock --no-update",
+        "cwd": "apps/proj"
+      }
+    },
+    "add": {
+      "executor": "@pymonorepo/nx-python:add",
+      "options": {}
+    },
+    "update": {
+      "executor": "@pymonorepo/nx-python:update",
+      "options": {}
+    },
+    "remove": {
+      "executor": "@pymonorepo/nx-python:remove",
+      "options": {}
+    },
+    "build": {
+      "executor": "@pymonorepo/nx-python:build",
+      "outputs": ["{projectRoot}/dist"],
+      "options": {
+        "outputPath": "apps/proj/dist",
+        "publish": false,
+        "lockedVersions": true,
+        "bundleLocalDependencies": true
+      }
+    },
+    "install": {
+      "executor": "@pymonorepo/nx-python:install",
+      "options": {
+        "silent": false,
+        "args": "",
+        "cacheDir": ".cache/pypoetry",
+        "verbose": false,
+        "debug": false
+      }
+    },
+    "lint": {
+      "executor": "@pymonorepo/nx-python:flake8",
+      "outputs": ["{workspaceRoot}/reports/apps/proj/pylint.txt"],
+      "options": {
+        "outputFile": "reports/apps/proj/pylint.txt"
+      }
+    },
+    "test": {
+      "executor": "@pymonorepo/nx-python:run-commands",
+      "outputs": [
+        "{workspaceRoot}/reports/apps/proj/unittests",
+        "{workspaceRoot}/coverage/apps/proj"
+      ],
+      "options": {
+        "command": "poetry run pytest tests/",
+        "cwd": "apps/proj"
+      }
+    }
+  },
+  "tags": []
+}

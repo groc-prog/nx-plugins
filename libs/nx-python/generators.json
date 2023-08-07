@@ -3,11 +3,6 @@
   "name": "nx-python",
   "version": "1.0.0",
   "generators": {
-    "project": {
-      "factory": "./src/generators/project/generator",
-      "schema": "./src/generators/project/schema.json",
-      "description": "python project generator (Legacy)"
-    },
     "migrate-to-shared-venv": {
       "factory": "./src/generators/migrate-to-shared-venv/generator",
       "schema": "./src/generators/migrate-to-shared-venv/schema.json",
