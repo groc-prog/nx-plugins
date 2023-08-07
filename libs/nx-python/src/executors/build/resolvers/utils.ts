@@ -25,8 +25,7 @@ export function includeDependencyPackage(
     }
 
     for (const pluginName in tomlData.tool.poetry.plugins) {
-      buildTomlData.tool.poetry.plugins[pluginName] =
-        tomlData.tool.poetry.plugins[pluginName];
+      buildTomlData.tool.poetry.plugins[pluginName] = tomlData.tool.poetry.plugins[pluginName];
     }
   }
 }

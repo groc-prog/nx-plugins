@@ -14,18 +14,14 @@ export async function checkPoetryExecutable() {
   try {
     await commandExists(POETRY_EXECUTABLE);
   } catch (e) {
-    throw new Error(
-      'Poetry is not installed. Please install Poetry before running this command.'
-    );
+    throw new Error('Poetry is not installed. Please install Poetry before running this command.');
   }
 }
 
 export async function getPoetryVersion() {
   const result = spawn.sync(POETRY_EXECUTABLE, ['--version']);
   if (result.error) {
-    throw new Error(
-      'Poetry is not installed. Please install Poetry before running this command.'
-    );
+    throw new Error('Poetry is not installed. Please install Poetry before running this command.');
   }
   const versionRegex = /version (\d+\.\d+\.\d+)/;
   const match = result.stdout.toString().trim().match(versionRegex);
@@ -48,9 +44,7 @@ export function addLocalProjectToPoetryProject(
   const dependencyName = dependencyTomlData.tool.poetry.name;
   if (group) {
     targetTomlData.tool.poetry.group = targetTomlData.tool.poetry.group || {};
-    targetTomlData.tool.poetry.group[group] = targetTomlData.tool.poetry.group[
-      group
-    ] || { dependencies: {} };
+    targetTomlData.tool.poetry.group[group] = targetTomlData.tool.poetry.group[group] || { dependencies: {} };
     targetTomlData.tool.poetry.group[group].dependencies[dependencyName] = {
       path: dependencyPath,
       develop: true,
@@ -69,14 +63,8 @@ export function addLocalProjectToPoetryProject(
   return dependencyName;
 }
 
-export function updateProject(
-  projectName: string,
-  cwd: string,
-  updateLockOnly: boolean
-) {
-  const updateLockArgs = ['update', projectName].concat(
-    updateLockOnly ? ['--lock'] : []
-  );
+export function updateProject(projectName: string, cwd: string, updateLockOnly: boolean) {
+  const updateLockArgs = ['update', projectName].concat(updateLockOnly ? ['--lock'] : []);
   runPoetry(updateLockArgs, { cwd });
 }
 
@@ -88,15 +76,10 @@ export function parseToml(tomlFile: string) {
   return toml.parse(fs.readFileSync(tomlFile, 'utf-8')) as PyprojectToml;
 }
 
-export function getLocalDependencyConfig(
-  context: ExecutorContext,
-  dependencyName: string
-) {
+export function getLocalDependencyConfig(context: ExecutorContext, dependencyName: string) {
   const dependencyConfig = context.workspace.projects[dependencyName];
   if (!dependencyConfig) {
-    throw new Error(
-      chalk`project {bold ${dependencyName}} not found in the Nx workspace`
-    );
+    throw new Error(chalk`project {bold ${dependencyName}} not found in the Nx workspace`);
   }
   return dependencyConfig;
 }
@@ -106,10 +89,7 @@ export type RunPoetryOptions = {
   error?: boolean;
 } & SpawnSyncOptions;
 
-export function runPoetry(
-  args: string[],
-  options: RunPoetryOptions = {}
-): void {
+export function runPoetry(args: string[], options: RunPoetryOptions = {}): void {
   const log = options.log ?? true;
   const error = options.error ?? true;
   delete options.log;
@@ -120,9 +100,7 @@ export function runPoetry(
   if (log) {
     console.log(
       chalk`{bold Running command}: ${commandStr} ${
-        options.cwd && options.cwd !== '.'
-          ? chalk`at {bold ${options.cwd}} folder`
-          : ''
+        options.cwd && options.cwd !== '.' ? chalk`at {bold ${options.cwd}} folder` : ''
       }\n`
     );
   }
@@ -134,9 +112,7 @@ export function runPoetry(
   });
 
   if (error && result.status !== 0) {
-    throw new Error(
-      chalk`{bold ${commandStr}} command failed with exit code {bold ${result.status}}`
-    );
+    throw new Error(chalk`{bold ${commandStr}} command failed with exit code {bold ${result.status}}`);
   }
 }
 
@@ -145,14 +121,10 @@ export function activateVenv(workspaceRoot: string) {
     const rootPyproject = path.join(workspaceRoot, 'pyproject.toml');
 
     if (fs.existsSync(rootPyproject)) {
-      const rootConfig = parse(
-        fs.readFileSync(rootPyproject, 'utf-8')
-      ) as PyprojectToml;
+      const rootConfig = parse(fs.readFileSync(rootPyproject, 'utf-8')) as PyprojectToml;
       const autoActivate = rootConfig.tool.nx?.autoActivate ?? false;
       if (autoActivate) {
-        console.log(
-          chalk`\n{bold shared virtual environment detected and not activated, activating...}\n\n`
-        );
+        console.log(chalk`\n{bold shared virtual environment detected and not activated, activating...}\n\n`);
         const virtualEnv = path.resolve(workspaceRoot, '.venv');
         process.env.VIRTUAL_ENV = virtualEnv;
         process.env.PATH = `${virtualEnv}/bin:${process.env.PATH}`;

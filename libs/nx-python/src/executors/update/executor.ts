@@ -13,10 +13,7 @@ import {
 import { updateDependencyTree } from '../../dependency/update-dependency';
 import { existsSync } from 'fs-extra';
 
-export default async function executor(
-  options: UpdateExecutorSchema,
-  context: ExecutorContext
-) {
+export default async function executor(options: UpdateExecutorSchema, context: ExecutorContext) {
   const workspaceRoot = context.root;
   process.chdir(workspaceRoot);
 
@@ -27,20 +24,11 @@ export default async function executor(
     const rootPyprojectToml = existsSync('pyproject.toml');
 
     if (options.local && options.name) {
-      console.log(
-        chalk`\n  {bold Updating {bgBlue  ${options.name} } workspace dependency...}\n`
-      );
-      updateLocalProject(
-        context,
-        options.name,
-        projectConfig,
-        rootPyprojectToml
-      );
+      console.log(chalk`\n  {bold Updating {bgBlue  ${options.name} } workspace dependency...}\n`);
+      updateLocalProject(context, options.name, projectConfig, rootPyprojectToml);
     } else {
       if (options.name) {
-        console.log(
-          chalk`\n  {bold Updating {bgBlue  ${options.name} } dependency...}\n`
-        );
+        console.log(chalk`\n  {bold Updating {bgBlue  ${options.name} } dependency...}\n`);
       } else {
         console.log(chalk`\n  {bold Updating project dependencies...}\n`);
       }
@@ -78,9 +66,5 @@ function updateLocalProject(
   const dependencyConfig = getLocalDependencyConfig(context, dependencyName);
   const dependencyProjectToml = parseToml(getProjectTomlPath(dependencyConfig));
 
-  updateProject(
-    dependencyProjectToml.tool.poetry.name,
-    projectConfig.root,
-    updateLockOnly
-  );
+  updateProject(dependencyProjectToml.tool.poetry.name, projectConfig.root, updateLockOnly);
 }

@@ -1,12 +1,7 @@
 import { ExecutorContext, ProjectsConfigurations } from '@nx/devkit';
 import chalk from 'chalk';
 import { getDependents, PyprojectToml } from '../graph/dependency-graph';
-import {
-  getProjectTomlPath,
-  parseToml,
-  runPoetry,
-  updateProject,
-} from '../executors/utils/poetry';
+import { getProjectTomlPath, parseToml, runPoetry, updateProject } from '../executors/utils/poetry';
 import { existsSync, readFileSync } from 'fs-extra';
 import { parse } from '@iarna/toml';
 
@@ -14,23 +9,13 @@ export function updateDependencyTree(context: ExecutorContext) {
   const rootPyprojectToml = existsSync('pyproject.toml');
   const pkgName = getProjectPackageName(context, context.projectName);
 
-  updateDependents(
-    context,
-    context.workspace,
-    context.projectName,
-    rootPyprojectToml,
-    context.root
-  );
+  updateDependents(context, context.workspace, context.projectName, rootPyprojectToml, context.root);
 
   if (rootPyprojectToml) {
-    const rootPyprojectToml = parse(
-      readFileSync('pyproject.toml', { encoding: 'utf-8' })
-    ) as PyprojectToml;
+    const rootPyprojectToml = parse(readFileSync('pyproject.toml', { encoding: 'utf-8' })) as PyprojectToml;
 
     if (rootPyprojectToml.tool.poetry.dependencies[pkgName]) {
-      console.log(
-        chalk`\nUpdating root {bold pyproject.toml} dependency {bold ${pkgName}}`
-      );
+      console.log(chalk`\nUpdating root {bold pyproject.toml} dependency {bold ${pkgName}}`);
 
       runPoetry(['lock', '--no-update']);
       runPoetry(['install']);
@@ -60,14 +45,7 @@ export function updateDependents(
     const pkgName = getProjectPackageName(context, projectName);
     updateProject(pkgName, depConfig.root, updateLockOnly);
 
-    updateDependents(
-      context,
-      workspace,
-      dep,
-      updateLockOnly,
-      workspaceRoot,
-      updatedProjects
-    );
+    updateDependents(context, workspace, dep, updateLockOnly, workspaceRoot, updatedProjects);
   }
 }
 

@@ -13,10 +13,7 @@ import {
 } from '../utils/poetry';
 import { RemoveExecutorSchema } from './schema';
 
-export default async function executor(
-  options: RemoveExecutorSchema,
-  context: ExecutorContext
-) {
+export default async function executor(options: RemoveExecutorSchema, context: ExecutorContext) {
   const workspaceRoot = context.root;
   process.chdir(workspaceRoot);
   try {
@@ -24,9 +21,7 @@ export default async function executor(
     await checkPoetryExecutable();
     const rootPyprojectToml = existsSync('pyproject.toml');
     const projectConfig = context.workspace.projects[context.projectName];
-    console.log(
-      chalk`\n  {bold Removing {bgBlue  ${options.name} } dependency...}\n`
-    );
+    console.log(chalk`\n  {bold Removing {bgBlue  ${options.name} } dependency...}\n`);
 
     let dependencyName = options.name;
     if (options.local) {
@@ -52,9 +47,7 @@ export default async function executor(
 
     updateDependencyTree(context);
 
-    console.log(
-      chalk`\n  {green.bold '${options.name}'} {green dependency has been successfully removed}\n`
-    );
+    console.log(chalk`\n  {green.bold '${options.name}'} {green dependency has been successfully removed}\n`);
 
     return {
       success: true,

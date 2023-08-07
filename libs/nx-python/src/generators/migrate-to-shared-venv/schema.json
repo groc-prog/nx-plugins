@@ -17,7 +17,7 @@
     "pyenvPythonVersion": {
       "type": "string",
       "description": "Pyenv .python-version content",
-      "default": "3.9.5"
+      "default": "^3.10"
     },
     "autoActivate": {
       "type": "boolean",

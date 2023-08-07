@@ -3,18 +3,11 @@ import { Logger } from '../utils/logger';
 import { ExecutorContext } from '@nx/devkit';
 import chalk from 'chalk';
 import path from 'path';
-import {
-  checkPoetryExecutable,
-  runPoetry,
-  RunPoetryOptions,
-} from '../utils/poetry';
+import { checkPoetryExecutable, runPoetry, RunPoetryOptions } from '../utils/poetry';
 
 const logger = new Logger();
 
-export default async function executor(
-  options: InstallExecutorSchema,
-  context: ExecutorContext
-) {
+export default async function executor(options: InstallExecutorSchema, context: ExecutorContext) {
   logger.setOptions(options);
   const workspaceRoot = context.root;
   process.chdir(workspaceRoot);
@@ -29,9 +22,7 @@ export default async function executor(
       verboseArg = '-vv';
     }
 
-    const installArgs = ['install', verboseArg].concat(
-      options.args ? options.args.split(' ') : []
-    );
+    const installArgs = ['install', verboseArg].concat(options.args ? options.args.split(' ') : []);
 
     const execOpts: RunPoetryOptions = {
       cwd: projectConfig.root,

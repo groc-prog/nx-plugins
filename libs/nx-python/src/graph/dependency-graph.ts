@@ -68,11 +68,7 @@ export type PyprojectToml = {
   };
 };
 
-export const getDependents = (
-  projectName: string,
-  workspace: ProjectsConfigurations,
-  cwd: string
-): string[] => {
+export const getDependents = (projectName: string, workspace: ProjectsConfigurations, cwd: string): string[] => {
   const deps: string[] = [];
 
   const { root } = workspace.projects[projectName];
@@ -86,11 +82,7 @@ export const getDependents = (
   return deps;
 };
 
-export const getDependencies = (
-  projectName: string,
-  workspace: ProjectsConfigurations,
-  cwd: string
-): Dependency[] => {
+export const getDependencies = (projectName: string, workspace: ProjectsConfigurations, cwd: string): Dependency[] => {
   const projectData = workspace.projects[projectName];
   const pyprojectToml = joinPathFragments(projectData.root, 'pyproject.toml');
 
@@ -99,33 +91,16 @@ export const getDependencies = (
   if (existsSync(pyprojectToml)) {
     const tomlData = getPyprojectData(pyprojectToml);
 
-    resolveDependencies(
-      tomlData.tool?.poetry?.dependencies,
-      projectData,
-      workspace,
-      cwd,
-      deps,
-      'main'
-    );
+    resolveDependencies(tomlData.tool?.poetry?.dependencies, projectData, workspace, cwd, deps, 'main');
     for (const group in tomlData.tool?.poetry?.group || {}) {
-      resolveDependencies(
-        tomlData.tool.poetry.group[group].dependencies,
-        projectData,
-        workspace,
-        cwd,
-        deps,
-        group
-      );
+      resolveDependencies(tomlData.tool.poetry.group[group].dependencies, projectData, workspace, cwd, deps, group);
     }
   }
 
   return deps;
 };
 
-export const processProjectGraph = (
-  graph: ProjectGraph,
-  context: ProjectGraphProcessorContext
-) => {
+export const processProjectGraph = (graph: ProjectGraph, context: ProjectGraphProcessorContext) => {
   const builder = new ProjectGraphBuilder(graph);
   for (const project in context.workspace.projects) {
     const deps = getDependencies(project, context.workspace, process.cwd());
@@ -155,22 +130,12 @@ const checkProjectIsDependent = (
   if (existsSync(pyprojectToml)) {
     const tomlData = getPyprojectData(pyprojectToml);
 
-    let isDep = isProjectDependent(
-      tomlData.tool?.poetry?.dependencies,
-      projectData,
-      root,
-      cwd
-    );
+    let isDep = isProjectDependent(tomlData.tool?.poetry?.dependencies, projectData, root, cwd);
 
     if (isDep) return true;
 
     for (const group in tomlData.tool?.poetry?.group || {}) {
-      isDep = isProjectDependent(
-        tomlData.tool.poetry.group[group].dependencies,
-        projectData,
-        root,
-        cwd
-      );
+      isDep = isProjectDependent(tomlData.tool.poetry.group[group].dependencies, projectData, root, cwd);
 
       if (isDep) return true;
     }
@@ -191,9 +156,7 @@ const isProjectDependent = (
     if (depData instanceof Object && depData.path) {
       const depAbsPath = path.resolve(projectData.root, depData.path);
 
-      if (
-        path.normalize(root) === path.normalize(path.relative(cwd, depAbsPath))
-      ) {
+      if (path.normalize(root) === path.normalize(path.relative(cwd, depAbsPath))) {
         return true;
       }
     }
@@ -215,9 +178,7 @@ const resolveDependencies = (
     if (depData instanceof Object && depData.path) {
       const depAbsPath = path.resolve(projectData.root, depData.path);
       const depProjectName = Object.keys(workspace.projects).find(
-        (proj) =>
-          path.normalize(workspace.projects[proj].root) ===
-          path.normalize(path.relative(cwd, depAbsPath))
+        (proj) => path.normalize(workspace.projects[proj].root) === path.normalize(path.relative(cwd, depAbsPath))
       );
 
       if (depProjectName) {

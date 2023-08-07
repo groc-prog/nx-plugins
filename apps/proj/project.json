@@ -42,24 +42,6 @@
         "verbose": false,
         "debug": false
       }
-    },
-    "lint": {
-      "executor": "@pymonorepo/nx-python:flake8",
-      "outputs": ["{workspaceRoot}/reports/apps/proj/pylint.txt"],
-      "options": {
-        "outputFile": "reports/apps/proj/pylint.txt"
-      }
-    },
-    "test": {
-      "executor": "@pymonorepo/nx-python:run-commands",
-      "outputs": [
-        "{workspaceRoot}/reports/apps/proj/unittests",
-        "{workspaceRoot}/coverage/apps/proj"
-      ],
-      "options": {
-        "command": "poetry run pytest tests/",
-        "cwd": "apps/proj"
-      }
     }
   },
   "tags": []

@@ -24,13 +24,7 @@ export class LockedDependencyResolver {
     workspaceRoot: string
   ): Dependency[] {
     this.logger.info(chalk`  Resolving dependencies...`);
-    return this.resolveDependencies(
-      devDependencies,
-      root,
-      buildFolderPath,
-      buildTomlData,
-      workspaceRoot
-    );
+    return this.resolveDependencies(devDependencies, root, buildFolderPath, buildTomlData, workspaceRoot);
   }
 
   private resolveDependencies(
@@ -43,16 +37,9 @@ export class LockedDependencyResolver {
     level = 1
   ): Dependency[] {
     const tab = getLoggingTab(level);
-    const requerimentsTxt = this.getProjectRequirementsTxt(
-      devDependencies,
-      buildTomlData,
-      root,
-      buildFolderPath
-    );
+    const requerimentsTxt = this.getProjectRequirementsTxt(devDependencies, buildTomlData, root, buildFolderPath);
 
-    const lockData = parse(
-      readFileSync(join(root, 'poetry.lock')).toString('utf-8')
-    ) as PoetryLock;
+    const lockData = parse(readFileSync(join(root, 'poetry.lock')).toString('utf-8')) as PoetryLock;
 
     const requerimentsLines = requerimentsTxt.split('\n');
     for (const line of requerimentsLines) {
@@ -80,9 +67,7 @@ export class LockedDependencyResolver {
 
         dep.name = elements[0].split('==')[0];
         dep.version = elements[0].split('==')[1];
-        this.logger.info(
-          chalk`${tab}• Adding {blue.bold ${dep.name}==${dep.version}} dependency`
-        );
+        this.logger.info(chalk`${tab}• Adding {blue.bold ${dep.name}==${dep.version}} dependency`);
         this.resolvePackageExtras(dep);
 
         const lockedPkg = this.getLockedPackage(lockData, dep.name);
@@ -95,19 +80,11 @@ export class LockedDependencyResolver {
     if (buildTomlData.tool.poetry.extras) {
       for (const extra in buildTomlData.tool.poetry.extras) {
         const originalExtraDeps = buildTomlData.tool.poetry.extras[extra];
-        const lockedDeps = originalExtraDeps.map((dep) =>
-          lockData.package.find((pkg) => pkg.name === dep)
-        );
-        const resolvedDeps = this.resolveExtrasLockedDependencyTree(
-          lockData,
-          lockedDeps,
-          level
-        );
+        const lockedDeps = originalExtraDeps.map((dep) => lockData.package.find((pkg) => pkg.name === dep));
+        const resolvedDeps = this.resolveExtrasLockedDependencyTree(lockData, lockedDeps, level);
 
         this.logger.info(
-          chalk`${tab}• Extra: {blue.bold ${extra}} - {blue.bold ${resolvedDeps.join(
-            ', '
-          )}} Locked Dependencies`
+          chalk`${tab}• Extra: {blue.bold ${extra}} - {blue.bold ${resolvedDeps.join(', ')}} Locked Dependencies`
         );
         buildTomlData.tool.poetry.extras[extra] = resolvedDeps;
       }
@@ -169,14 +146,7 @@ export class LockedDependencyResolver {
 
     switch (lockedPkg.source.type) {
       case 'directory':
-        this.includeDirectoryDependency(
-          location,
-          workspaceRoot,
-          tab,
-          packageName,
-          buildFolderPath,
-          buildTomlData
-        );
+        this.includeDirectoryDependency(location, workspaceRoot, tab, packageName, buildFolderPath, buildTomlData);
         break;
       case 'git':
         this.includeGitDependency(tab, lockedPkg, dep, deps);
@@ -198,13 +168,9 @@ export class LockedDependencyResolver {
   }
 
   private getLockedPackage(lockData: PoetryLock, packageName: string) {
-    const lockedPkg = lockData.package.find(
-      (pkg) => pkg.name.toLowerCase() === packageName.toLowerCase()
-    );
+    const lockedPkg = lockData.package.find((pkg) => pkg.name.toLowerCase() === packageName.toLowerCase());
     if (!lockedPkg) {
-      throw new Error(
-        chalk`Package {blue.bold ${packageName.toLowerCase()}} not found in poetry.lock`
-      );
+      throw new Error(chalk`Package {blue.bold ${packageName.toLowerCase()}} not found in poetry.lock`);
     }
     return lockedPkg;
   }
@@ -219,26 +185,12 @@ export class LockedDependencyResolver {
   ) {
     const rootFolder = relative(workspaceRoot, uri2path(localDepUrl));
     const pyprojectToml = join(rootFolder, 'pyproject.toml');
-    const tomlData = parse(
-      readFileSync(pyprojectToml).toString('utf-8')
-    ) as PyprojectToml;
-    this.logger.info(
-      chalk`${tab}• Adding {blue.bold ${packageName}} local dependency`
-    );
-    includeDependencyPackage(
-      tomlData,
-      rootFolder,
-      buildFolderPath,
-      buildTomlData
-    );
+    const tomlData = parse(readFileSync(pyprojectToml).toString('utf-8')) as PyprojectToml;
+    this.logger.info(chalk`${tab}• Adding {blue.bold ${packageName}} local dependency`);
+    includeDependencyPackage(tomlData, rootFolder, buildFolderPath, buildTomlData);
   }
 
-  private includeGitDependency(
-    tab: string,
-    lockedPkg: PoetryLockPackage,
-    dep: Dependency,
-    deps: Dependency[]
-  ) {
+  private includeGitDependency(tab: string, lockedPkg: PoetryLockPackage, dep: Dependency, deps: Dependency[]) {
     dep.git = lockedPkg.source.url;
     dep.optional = lockedPkg.optional;
 
@@ -261,39 +213,22 @@ export class LockedDependencyResolver {
   ): string[] {
     const tab = getLoggingTab(level);
     for (const dep of deps) {
-      this.logger.info(
-        chalk`${tab}• Resolving dependency: {blue.bold ${dep.name}}`
-      );
-      if (
-        dep.source?.type !== 'directory' &&
-        !resolvedDeps.includes(dep.name)
-      ) {
+      this.logger.info(chalk`${tab}• Resolving dependency: {blue.bold ${dep.name}}`);
+      if (dep.source?.type !== 'directory' && !resolvedDeps.includes(dep.name)) {
         resolvedDeps.push(dep.name);
       }
       const pkgDeps = dep.dependencies ? Object.keys(dep.dependencies) : [];
       const optionalPkgDeps = pkgDeps
-        .map((depName) =>
-          lockData.package.find((pkg) => pkg.name === depName && pkg.optional)
-        )
-        .filter(
-          (pkgDep) =>
-            pkgDep !== undefined && !resolvedDeps.includes(pkgDep.name)
-        );
+        .map((depName) => lockData.package.find((pkg) => pkg.name === depName && pkg.optional))
+        .filter((pkgDep) => pkgDep !== undefined && !resolvedDeps.includes(pkgDep.name));
 
       optionalPkgDeps.forEach((pkgDep) => resolvedDeps.push(pkgDep.name));
       if (optionalPkgDeps.length > 0) {
         this.logger.info(
-          chalk`${tab}• Resolved Dependencies: {blue.bold ${optionalPkgDeps
-            .map((pkgDep) => pkgDep.name)
-            .join(' ')}}`
+          chalk`${tab}• Resolved Dependencies: {blue.bold ${optionalPkgDeps.map((pkgDep) => pkgDep.name).join(' ')}}`
         );
       }
-      this.resolveExtrasLockedDependencyTree(
-        lockData,
-        optionalPkgDeps,
-        level,
-        resolvedDeps
-      );
+      this.resolveExtrasLockedDependencyTree(lockData, optionalPkgDeps, level, resolvedDeps);
     }
 
     return resolvedDeps;

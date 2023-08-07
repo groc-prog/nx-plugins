@@ -13,10 +13,7 @@ import {
   updateProject,
 } from '../utils/poetry';
 
-export default async function executor(
-  options: AddExecutorSchema,
-  context: ExecutorContext
-) {
+export default async function executor(options: AddExecutorSchema, context: ExecutorContext) {
   const workspaceRoot = context.root;
   process.chdir(workspaceRoot);
   try {
@@ -26,27 +23,14 @@ export default async function executor(
     const rootPyprojectToml = existsSync('pyproject.toml');
 
     if (options.local) {
-      console.log(
-        chalk`\n  {bold Adding {bgBlue  ${options.name} } workspace dependency...}\n`
-      );
-      updateLocalProject(
-        context,
-        options.name,
-        projectConfig,
-        rootPyprojectToml,
-        options.group,
-        options.extras
-      );
+      console.log(chalk`\n  {bold Adding {bgBlue  ${options.name} } workspace dependency...}\n`);
+      updateLocalProject(context, options.name, projectConfig, rootPyprojectToml, options.group, options.extras);
     } else {
-      console.log(
-        chalk`\n  {bold Adding {bgBlue  ${options.name} } dependency...}\n`
-      );
+      console.log(chalk`\n  {bold Adding {bgBlue  ${options.name} } dependency...}\n`);
       const installArgs = ['add', options.name]
         .concat(options.group ? ['--group', options.group] : [])
         .concat(options.args ? options.args.split(' ') : [])
-        .concat(
-          options.extras ? options.extras.map((ex) => `--extras=${ex}`) : []
-        )
+        .concat(options.extras ? options.extras.map((ex) => `--extras=${ex}`) : [])
         .concat(rootPyprojectToml ? ['--lock'] : []);
 
       runPoetry(installArgs, { cwd: projectConfig.root });
@@ -79,10 +63,7 @@ function updateLocalProject(
 ) {
   const dependencyConfig = getLocalDependencyConfig(context, dependencyName);
 
-  const dependencyPath = path.relative(
-    projectConfig.root,
-    dependencyConfig.root
-  );
+  const dependencyPath = path.relative(projectConfig.root, dependencyConfig.root);
 
   const dependencyPkgName = addLocalProjectToPoetryProject(
     projectConfig,
