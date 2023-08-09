@@ -2,7 +2,7 @@
   "name": "nx-python",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "packages/nx-python/src",
-  "projectType": "library",
+  "type": "library",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",

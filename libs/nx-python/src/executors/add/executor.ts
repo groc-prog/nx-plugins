@@ -1,76 +1,79 @@
-import { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
-import { AddExecutorSchema } from './schema';
+import type { SpawnSyncOptions } from 'child_process';
+import type { ExecutorContext } from '@nx/devkit';
+import type { AddExecutorSchema } from './schema';
+import type { PyprojectToml } from '../utils/poetry';
+
+import { checkPoetryExecutable, runPoetry } from '../utils/poetry';
+import { omit } from 'lodash';
 import chalk from 'chalk';
-import { updateDependencyTree } from '../../dependency/update-dependency';
-import { existsSync } from 'fs-extra';
+import toml from '@iarna/toml';
+import fs from 'fs';
 import path from 'path';
-import {
-  activateVenv,
-  addLocalProjectToPoetryProject,
-  checkPoetryExecutable,
-  getLocalDependencyConfig,
-  runPoetry,
-  updateProject,
-} from '../utils/poetry';
 
 export default async function executor(options: AddExecutorSchema, context: ExecutorContext) {
-  const workspaceRoot = context.root;
-  process.chdir(workspaceRoot);
+  process.chdir(context.root);
+
   try {
-    activateVenv(workspaceRoot);
     await checkPoetryExecutable();
     const projectConfig = context.workspace.projects[context.projectName];
-    const rootPyprojectToml = existsSync('pyproject.toml');
+    const execOpts: SpawnSyncOptions = {
+      cwd: projectConfig.root,
+      env: process.env,
+    };
 
     if (options.local) {
-      console.log(chalk`\n  {bold Adding {bgBlue  ${options.name} } workspace dependency...}\n`);
-      updateLocalProject(context, options.name, projectConfig, rootPyprojectToml, options.group, options.extras);
-    } else {
-      console.log(chalk`\n  {bold Adding {bgBlue  ${options.name} } dependency...}\n`);
-      const installArgs = ['add', options.name]
-        .concat(options.group ? ['--group', options.group] : [])
-        .concat(options.args ? options.args.split(' ') : [])
-        .concat(options.extras ? options.extras.map((ex) => `--extras=${ex}`) : [])
-        .concat(rootPyprojectToml ? ['--lock'] : []);
+      // Install dependencies locally
+      console.log(chalk`\n  {bold Adding local dependencies: ${options.dependencies.join(', ')}}\n`);
+      addLocalProjectToPyprojectToml(context, options.dependencies);
 
-      runPoetry(installArgs, { cwd: projectConfig.root });
+      // Lock dependencies
+      runPoetry(['update', '--lock'], execOpts);
+    } else {
+      const addArgs = ['add'];
+      const additionalArgs = omit(options, ['dependencies', 'local']);
+
+      // Build provided arguments and add any additional arguments to the command
+      addArgs.push(
+        ...options.dependencies,
+        ...Object.entries(additionalArgs).map(([key, value]) => `--${key}=${value}`)
+      );
+
+      console.log(chalk`\n  {bold Adding dependencies: ${options.dependencies.join(', ')}}\n`);
+      runPoetry(addArgs, execOpts);
     }
 
-    updateDependencyTree(context);
-
-    console.log(
-      chalk`\n  {green.bold '${options.name}'} {green dependency has been successfully added to the project}\n`
-    );
-
-    return {
-      success: true,
-    };
+    console.log(chalk`\n  {green Dependencies have been successfully added to the project}\n`);
+    return { success: true };
   } catch (error) {
-    console.log(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
-    return {
-      success: false,
-    };
+    console.error(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
+    return { success: false };
   }
 }
 
-function updateLocalProject(
-  context: ExecutorContext,
-  dependencyName: string,
-  projectConfig: ProjectConfiguration,
-  updateLockOnly: boolean,
-  group?: string,
-  extras?: string[]
-) {
-  const dependencyConfig = getLocalDependencyConfig(context, dependencyName);
+/**
+ * Adds dependencies to current projects pyproject.toml
+ *
+ * @param {ExecutorContext} context - Executor context
+ * @param {string[]} dependencies - Dependencies to add
+ */
+function addLocalProjectToPyprojectToml(context: ExecutorContext, dependencies: string[]): void {
+  // Get current pyproject.toml file path
+  const currentProjectPath = context.workspace.projects[context.projectName];
+  const pyprojectTomlPath = path.join(currentProjectPath.root, 'pyproject.toml');
 
-  const dependencyPath = path.relative(projectConfig.root, dependencyConfig.root);
+  const parsedToml = toml.parse(fs.readFileSync(pyprojectTomlPath, 'utf-8')) as PyprojectToml;
 
-  const dependencyPkgName = addLocalProjectToPoetryProject(
-    projectConfig,
-    dependencyConfig,
-    dependencyPath,
-    group,
-    extras
-  );
-  updateProject(dependencyPkgName, projectConfig.root, updateLockOnly);
+  // Add dependencies to pyproject.toml
+  dependencies.forEach((dependency) => {
+    if (!context.workspace.projects[dependency])
+      throw new Error(chalk`Project {bold ${dependency}} not found in the Nx workspace`);
+
+    parsedToml.tool.poetry.dependencies[dependency] = {
+      path: path.relative(currentProjectPath.root, context.workspace.projects[dependency].root),
+      develop: true,
+    };
+
+    // Write pyproject.toml
+    fs.writeFileSync(pyprojectTomlPath, toml.stringify(parsedToml));
+  });
 }

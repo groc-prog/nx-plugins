@@ -1,49 +1,33 @@
-import { InstallExecutorSchema } from './schema';
-import { Logger } from '../utils/logger';
-import { ExecutorContext } from '@nx/devkit';
-import chalk from 'chalk';
-import path from 'path';
-import { checkPoetryExecutable, runPoetry, RunPoetryOptions } from '../utils/poetry';
+import type { SpawnSyncOptions } from 'child_process';
+import type { ExecutorContext } from '@nx/devkit';
+import type { InstallExecutorSchema } from './schema';
 
-const logger = new Logger();
+import { checkPoetryExecutable, runPoetry } from '../utils/poetry';
+import chalk from 'chalk';
 
 export default async function executor(options: InstallExecutorSchema, context: ExecutorContext) {
-  logger.setOptions(options);
-  const workspaceRoot = context.root;
-  process.chdir(workspaceRoot);
+  process.chdir(context.root);
+
   try {
     await checkPoetryExecutable();
     const projectConfig = context.workspace.projects[context.projectName];
-    let verboseArg = '-v';
 
-    if (options.debug) {
-      verboseArg = '-vvv';
-    } else if (options.verbose) {
-      verboseArg = '-vv';
-    }
+    // Add any additional arguments to the command
+    const installArgs = ['install'];
+    installArgs.push(...Object.entries(options).map(([key, value]) => `--${key}=${value}`));
 
-    const installArgs = ['install', verboseArg].concat(options.args ? options.args.split(' ') : []);
-
-    const execOpts: RunPoetryOptions = {
+    const execOpts: SpawnSyncOptions = {
       cwd: projectConfig.root,
+      env: process.env,
     };
 
-    if (options.cacheDir) {
-      execOpts.env = {
-        ...process.env,
-        POETRY_CACHE_DIR: path.resolve(options.cacheDir),
-      };
-    }
-
+    console.log(chalk`\n  {bold Installing dependencies...}\n`);
     runPoetry(installArgs, execOpts);
 
-    return {
-      success: true,
-    };
+    console.log(chalk`\n  {green Dependencies have been successfully installed}\n`);
+    return { success: true };
   } catch (error) {
-    logger.info(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
-    return {
-      success: false,
-    };
+    console.error(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
+    return { success: false };
   }
 }

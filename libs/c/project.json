@@ -1,0 +1,33 @@
+{
+  "name": "c",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/c",
+  "targets": {
+    "install": {
+      "executor": "@pymonorepo/nx-python:install",
+      "options": {}
+    },
+    "add": {
+      "executor": "@pymonorepo/nx-python:add",
+      "options": {
+        "local": false
+      }
+    },
+    "remove": {
+      "executor": "@pymonorepo/nx-python:remove",
+      "options": {}
+    },
+    "update": {
+      "executor": "@pymonorepo/nx-python:update",
+      "options": {}
+    },
+    "build": {
+      "executor": "@pymonorepo/nx-python:build",
+      "options": {
+        "outputPath": "build",
+        "ignorePaths": []
+      }
+    }
+  }
+}

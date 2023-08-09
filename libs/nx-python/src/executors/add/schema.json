@@ -4,35 +4,18 @@
   "description": "",
   "type": "object",
   "properties": {
-    "name": {
-      "type": "string",
-      "description": "Package name",
-      "$default": {
-        "$source": "argv",
-        "index": 0
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
       },
-      "x-prompt": "What is the Dependency name?"
-    },
-    "args": {
-      "type": "string",
-      "description": "Install additional arguments"
+      "description": "Dependencies to install."
     },
     "local": {
       "type": "boolean",
-      "description": "Local dependency",
+      "description": "Whether the dependencies are local libs or not.",
       "default": false
-    },
-    "group": {
-      "type": "string",
-      "description": "Dependency Group"
-    },
-    "extras": {
-      "type": "array",
-      "description": "Extras to activate for the dependency",
-      "items": {
-        "type": "string"
-      }
     }
   },
-  "required": ["name"]
+  "required": ["dependencies"]
 }

@@ -1,61 +1,39 @@
-import { ExecutorContext } from '@nx/devkit';
+import type { SpawnSyncOptions } from 'child_process';
+import type { ExecutorContext } from '@nx/devkit';
+import type { RemoveExecutorSchema } from './schema';
+
+import { checkPoetryExecutable, runPoetry } from '../utils/poetry';
+import { omit } from 'lodash';
 import chalk from 'chalk';
-import { existsSync } from 'fs-extra';
-import { updateDependencyTree } from '../../dependency/update-dependency';
-import {
-  activateVenv,
-  checkPoetryExecutable,
-  getLocalDependencyConfig,
-  getPoetryVersion,
-  getProjectTomlPath,
-  parseToml,
-  runPoetry,
-} from '../utils/poetry';
-import { RemoveExecutorSchema } from './schema';
 
 export default async function executor(options: RemoveExecutorSchema, context: ExecutorContext) {
-  const workspaceRoot = context.root;
-  process.chdir(workspaceRoot);
+  process.chdir(context.root);
+
   try {
-    activateVenv(workspaceRoot);
     await checkPoetryExecutable();
-    const rootPyprojectToml = existsSync('pyproject.toml');
     const projectConfig = context.workspace.projects[context.projectName];
-    console.log(chalk`\n  {bold Removing {bgBlue  ${options.name} } dependency...}\n`);
 
-    let dependencyName = options.name;
-    if (options.local) {
-      const dependencyConfig = getLocalDependencyConfig(context, options.name);
+    const removeArgs = ['remove'];
+    const additionalArgs = omit(options, ['dependencies']);
 
-      const pyprojectTomlPath = getProjectTomlPath(dependencyConfig);
-      const {
-        tool: {
-          poetry: { name },
-        },
-      } = parseToml(pyprojectTomlPath);
+    // Build provided arguments and add any additional arguments to the command
+    removeArgs.push(
+      ...options.dependencies,
+      ...Object.entries(additionalArgs).map(([key, value]) => `--${key}=${value}`)
+    );
 
-      dependencyName = name;
-    }
-
-    const poetryVersion = await getPoetryVersion();
-    const hasLockOption = poetryVersion >= '1.5.0';
-
-    const removeArgs = ['remove', dependencyName]
-      .concat(options.args ? options.args.split(' ') : [])
-      .concat(rootPyprojectToml && hasLockOption ? ['--lock'] : []);
-    runPoetry(removeArgs, { cwd: projectConfig.root });
-
-    updateDependencyTree(context);
-
-    console.log(chalk`\n  {green.bold '${options.name}'} {green dependency has been successfully removed}\n`);
-
-    return {
-      success: true,
+    const execOpts: SpawnSyncOptions = {
+      cwd: projectConfig.root,
+      env: process.env,
     };
+
+    console.log(chalk`\n  {bold Removing dependencies: ${options.dependencies.join(', ')}}\n`);
+    runPoetry(removeArgs, execOpts);
+
+    console.log(chalk`\n  {green Dependencies have been successfully removed from the project}\n`);
+    return { success: true };
   } catch (error) {
-    console.log(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
-    return {
-      success: false,
-    };
+    console.error(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
+    return { success: false };
   }
 }

@@ -4,20 +4,13 @@
   "description": "",
   "type": "object",
   "properties": {
-    "name": {
-      "type": "string",
-      "description": "Package name",
-      "x-prompt": "What is the Dependency name?"
-    },
-    "args": {
-      "type": "string",
-      "description": "Install additional arguments"
-    },
-    "local": {
-      "type": "boolean",
-      "description": "Local dependency",
-      "default": false
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dependencies to remove."
     }
   },
-  "required": ["name"]
+  "required": ["dependencies"]
 }

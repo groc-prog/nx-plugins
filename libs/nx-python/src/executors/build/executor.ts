@@ -1,133 +1,113 @@
-import { ExecutorContext } from '@nx/devkit';
-import { BuildExecutorSchema } from './schema';
-import { readdirSync, copySync, readFileSync, writeFileSync, mkdirSync, removeSync } from 'fs-extra';
-import { join } from 'path';
-import { PyprojectToml, PyprojectTomlDependency } from '../../graph/dependency-graph';
-import { parse, stringify } from '@iarna/toml';
-import { tmpdir } from 'os';
-import { v4 as uuid } from 'uuid';
-import chalk from 'chalk';
-import { Logger } from '../utils/logger';
-import { activateVenv, checkPoetryExecutable, runPoetry } from '../utils/poetry';
-import { LockedDependencyResolver, ProjectDependencyResolver } from './resolvers';
-import { Dependency } from './resolvers/types';
+import type { ExecutorContext } from '@nx/devkit';
+import type { BuildExecutorSchema } from './schema';
+import type { PyprojectToml } from '../utils/poetry';
 
-const logger = new Logger();
+import { copySync, readFileSync, mkdirSync, ensureDirSync, writeFileSync, removeSync } from 'fs-extra';
+import { parse, stringify } from '@iarna/toml';
+import { checkPoetryExecutable, runPoetry } from '../utils/poetry';
+import { tmpdir } from 'os';
+import { v4 as uuidv4 } from 'uuid';
+import { isObject } from 'lodash';
+import chalk from 'chalk';
+import path from 'path';
+
+const IGNORED_PATHS = ['.venv', 'build', 'tests', 'project.json'];
 
 export default async function executor(options: BuildExecutorSchema, context: ExecutorContext) {
-  logger.setOptions(options);
-  const workspaceRoot = context.root;
-  process.chdir(workspaceRoot);
   try {
-    activateVenv(workspaceRoot);
     await checkPoetryExecutable();
-    if (options.lockedVersions === true && options.bundleLocalDependencies === false) {
-      throw new Error('Not supported operations, you cannot use lockedVersions without bundleLocalDependencies');
-    }
 
-    logger.info(chalk`\n  {bold Building project {bgBlue  ${context.projectName} }...}\n`);
-
+    console.log(chalk`\n  {bold Building project {bgBlue  ${context.projectName} }...}\n`);
     const { root } = context.workspace.projects[context.projectName];
+    const tmpBuildFolderPath = path.join(tmpdir(), 'nx-python', 'build', uuidv4());
+    const buildFolderPath = path.join(root, options.outputPath);
 
-    const buildFolderPath = join(tmpdir(), 'nx-python', 'build', uuid());
+    // Map ignore paths to absolute paths
+    options.ignorePaths = [...IGNORED_PATHS, ...options.ignorePaths];
+    options.ignorePaths = options.ignorePaths.map((ignorePath) => path.join(root, ignorePath));
 
-    mkdirSync(buildFolderPath, { recursive: true });
+    mkdirSync(tmpBuildFolderPath, { recursive: true });
+    copySync(root, tmpBuildFolderPath, { filter: (file) => !options.ignorePaths.includes(file) });
 
-    logger.info(chalk`  Copying project files to a temporary folder`);
-    readdirSync(root).forEach((file) => {
-      if (!options.ignorePaths.includes(file)) {
-        const source = join(root, file);
-        const target = join(buildFolderPath, file);
-        copySync(source, target);
-      }
-    });
-
-    const buildPyProjectToml = join(buildFolderPath, 'pyproject.toml');
-
+    const buildPyProjectToml = path.join(tmpBuildFolderPath, 'pyproject.toml');
     const buildTomlData = parse(readFileSync(buildPyProjectToml).toString('utf-8')) as PyprojectToml;
 
-    const deps = resolveDependencies(options, root, buildFolderPath, buildTomlData, workspaceRoot, context);
-
-    const pythonDependency = buildTomlData.tool.poetry.dependencies.python;
-
-    buildTomlData.tool.poetry.dependencies = {};
-    buildTomlData.tool.poetry.group = {
-      dev: {
-        dependencies: {},
-      },
-    };
-
-    if (pythonDependency) {
-      buildTomlData.tool.poetry.dependencies['python'] = pythonDependency;
-    }
-
-    for (const dep of deps) {
-      const pyprojectDep = parseToPyprojectDependency(dep);
-      buildTomlData.tool.poetry.dependencies[dep.name] = pyprojectDep;
-    }
-
+    resolveDependencies(buildTomlData, root, tmpBuildFolderPath, root);
     writeFileSync(buildPyProjectToml, stringify(buildTomlData));
-    const distFolder = join(buildFolderPath, 'dist');
 
-    removeSync(distFolder);
+    console.log(chalk`  {bold Building artifacts...}\n`);
+    runPoetry(['build'], { cwd: tmpBuildFolderPath, env: process.env });
 
-    logger.info(chalk`  Generating sdist and wheel artifacts`);
-    const buildArgs = ['build'];
-    runPoetry(buildArgs, { cwd: buildFolderPath });
+    ensureDirSync(buildFolderPath);
+    copySync(path.join(tmpBuildFolderPath, 'dist'), buildFolderPath, { overwrite: true });
+    removeSync(tmpBuildFolderPath);
 
-    removeSync(options.outputPath);
-    mkdirSync(options.outputPath, { recursive: true });
-    logger.info(chalk`  Artifacts generated at {bold ${options.outputPath}} folder`);
-    copySync(distFolder, options.outputPath);
-
-    if (!options.keepBuildFolder) {
-      removeSync(buildFolderPath);
-    }
-
-    return {
-      success: true,
-    };
+    console.log(chalk`  {bold Artifacts build at ${buildFolderPath}}\n`);
+    return { success: true };
   } catch (error) {
-    logger.info(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
-    return {
-      success: false,
-    };
+    console.error(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
+    return { success: false };
   }
 }
 
-function parseToPyprojectDependency(dep: Dependency): PyprojectTomlDependency {
-  if (dep.markers || dep.optional || dep.extras || dep.git || dep.source) {
-    return {
-      version: dep.version,
-      markers: dep.markers,
-      optional: dep.optional,
-      extras: dep.extras,
-      git: dep.git,
-      rev: dep.rev,
-      source: dep.source,
-    };
-  } else {
-    return dep.version;
-  }
-}
-
+/**
+ * Resolves dependencies for the project to be built and copies them to the build folder.
+ *
+ * @param {PyprojectToml} pyProjectTomlData - pyproject.toml data of the project to be built
+ * @param {string} dependencyProjectPath - Path from the workspace root to the project for which dependencies are being resolved
+ * @param {string} buildFolderPath - Path to the build folder
+ * @param {string} projectPath - Path to the root of the project being built
+ * @throws {Error} - If dependency versions mismatch
+ */
 function resolveDependencies(
-  options: BuildExecutorSchema,
-  root: string,
+  pyProjectTomlData: PyprojectToml,
+  dependencyProjectPath: string,
   buildFolderPath: string,
-  buildTomlData: PyprojectToml,
-  workspaceRoot: string,
-  context: ExecutorContext
-) {
-  if (options.lockedVersions) {
-    return new LockedDependencyResolver(logger).resolve(
-      root,
-      buildFolderPath,
-      buildTomlData,
-      options.devDependencies,
-      workspaceRoot
-    );
-  } else {
-    return new ProjectDependencyResolver(logger, options, context).resolve(root, buildFolderPath, buildTomlData);
-  }
+  projectPath: string
+): void {
+  console.log(chalk`  {bold Resolving dependencies for {bgBlue  ${dependencyProjectPath} }...}\n`);
+  const dependencyPyProjectToml = path.join(dependencyProjectPath, 'pyproject.toml');
+  const dependencyTomlData = parse(readFileSync(dependencyPyProjectToml).toString('utf-8')) as PyprojectToml;
+
+  Object.keys(dependencyTomlData.tool.poetry.dependencies).forEach((dependencyName) => {
+    const projectDependency = dependencyTomlData.tool.poetry.dependencies[dependencyName];
+    const buildDependency = pyProjectTomlData.tool.poetry.dependencies[dependencyName];
+
+    if (isObject(projectDependency) && projectDependency.path) {
+      const newProjectPath = path.join(dependencyProjectPath, projectDependency.path);
+
+      resolveDependencies(pyProjectTomlData, newProjectPath, buildFolderPath, projectPath);
+      copyDependencyProject(pyProjectTomlData, dependencyName, newProjectPath, buildFolderPath);
+
+      pyProjectTomlData.tool.poetry.dependencies[dependencyName] = undefined;
+    } else {
+      if (buildDependency && buildDependency !== projectDependency)
+        throw new Error(
+          chalk`\n  {bgRed.bold  ERROR } Dependency version mismatch for ${dependencyName}. Found versions ${projectDependency} and ${buildDependency}. \n`
+        );
+
+      pyProjectTomlData.tool.poetry.dependencies[dependencyName] = projectDependency;
+    }
+  });
+}
+
+/**
+ * Copies the dependency project to the build folder and adds it to the `pyproject.toml` of the
+ * project to be built.
+ *
+ * @param {PyprojectToml} pyProjectTomlData - pyproject.toml data of the project to be built
+ * @param {string} dependencyName - Name of the dependency
+ * @param {string} dependencyProjectPath - Path to the dependency project from the workspace root
+ * @param {string} buildFolderPath - Path to the build folder
+ */
+function copyDependencyProject(
+  pyProjectTomlData: PyprojectToml,
+  dependencyName: string,
+  dependencyProjectPath: string,
+  buildFolderPath: string
+): void {
+  const ignorePaths = IGNORED_PATHS.map((ignorePath) => path.join(dependencyProjectPath, ignorePath));
+
+  copySync(dependencyProjectPath, buildFolderPath, { filter: (file) => !ignorePaths.includes(file) });
+  pyProjectTomlData.tool.poetry.packages.push({ include: dependencyName });
 }

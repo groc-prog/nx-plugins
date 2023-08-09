@@ -1,0 +1,35 @@
+[tool.poetry]
+name = "c"
+version = "1.0.0"
+description = ""
+authors = [ ]
+readme = "README.md"
+
+  [[tool.poetry.packages]]
+  include = "c"
+
+  [tool.poetry.dependencies]
+  python = "^3.10"
+
+    [tool.poetry.dependencies.d]
+    path = "../d"
+    develop = true
+
+    [tool.poetry.dependencies.e]
+    path = "../e"
+    develop = true
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^2.17.5"
+black = "^23.7.0"
+pytest = "^7.4.0"
+
+[tool.black]
+line-length = 120
+target-version = [ "py310" ]
+workers = 4
+exclude = "tests"
+
+[build-system]
+requires = [ "poetry-core" ]
+build-backend = "poetry.core.masonry.api"

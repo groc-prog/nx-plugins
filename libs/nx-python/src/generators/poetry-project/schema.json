@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$id": "PoetryPythonProject",
-  "title": "Generate a new Poetry Python Project.",
+  "$id": "PoetryProject",
+  "title": "Generate a new Python project using Poetry.",
   "type": "object",
   "properties": {
     "name": {
@@ -13,37 +13,17 @@
       },
       "x-prompt": "What name would you like to use?"
     },
-    "projectType": {
+    "type": {
       "type": "string",
-      "description": "Project type",
+      "description": "Project type.",
       "default": "application",
       "enum": ["application", "library"]
     },
     "description": {
       "type": "string",
-      "description": "Project short description",
+      "description": "Project description.",
       "default": ""
-    },
-    "buildLockedVersions": {
-      "type": "boolean",
-      "description": "Use locked versions for build dependencies",
-      "default": true
-    },
-    "buildBundleLocalDependencies": {
-      "type": "boolean",
-      "description": "Bundle local dependencies",
-      "default": true
-    },
-    "rootPyprojectDependencyGroup": {
-      "type": "string",
-      "description": "If a shared pyproject.toml is used, which dependency group does this new project should belong to",
-      "default": "main"
-    },
-    "tags": {
-      "type": "string",
-      "description": "Add tags to the project (used for linting)",
-      "alias": "t"
     }
   },
-  "required": ["name", "projectType"]
+  "required": ["name", "type"]
 }

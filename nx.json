@@ -36,5 +36,8 @@
       "!{projectRoot}/test-setup.[jt]s"
     ],
     "sharedGlobals": []
+  },
+  "workspaceLayout": {
+    "appsDir": "services"
   }
 }

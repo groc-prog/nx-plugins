@@ -1,12 +1,10 @@
 [tool.poetry]
-name = "<%= packageName %>"
+name = "<%= projectName %>"
 version = "1.0.0"
 description = "<%= description %>"
 authors = [ ]
 readme = 'README.md'
-
-  [[tool.poetry.packages]]
-  include = "<%= moduleName %>"
+packages = [{include = "<%= moduleName %>"}]
 
   [tool.poetry.dependencies]
   python = "^3.10"

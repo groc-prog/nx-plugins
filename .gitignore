@@ -2,8 +2,10 @@
 
 # compiled output
 dist
+build
 tmp
 /out-tsc
+.venv
 
 # dependencies
 node_modules

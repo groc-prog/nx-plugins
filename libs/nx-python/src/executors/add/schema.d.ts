@@ -1,7 +1,5 @@
 export interface AddExecutorSchema {
-  name: string;
+  [key: string]: unknown;
+  dependencies: string[];
   local: boolean;
-  args?: string;
-  group?: string;
-  extras?: string[];
 }
