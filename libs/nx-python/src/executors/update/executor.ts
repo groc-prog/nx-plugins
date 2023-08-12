@@ -2,7 +2,7 @@ import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
 import type { UpdateExecutorSchema } from './schema';
 
-import { checkPoetryExecutable, runPoetry } from '../utils/poetry';
+import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
 import { omit } from 'lodash';
 import chalk from 'chalk';
 

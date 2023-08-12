@@ -1,0 +1,18 @@
+<%if (autoActivate) { -%>
+[tool.nx]
+autoActivate = true
+
+<% } -%>
+[tool.poetry]
+name = "<%= projectName %>"
+version = "0.0.0"
+description = "Automatically generated shared virtual environment by Nx."
+authors = [ ]
+readme = 'README.md'
+
+  [tool.poetry.dependencies]
+  python = "^3.10"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

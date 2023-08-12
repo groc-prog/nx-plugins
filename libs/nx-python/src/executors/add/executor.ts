@@ -1,10 +1,10 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
 import type { AddExecutorSchema } from './schema';
-import type { PyprojectToml } from '../utils/poetry';
+import type { PyprojectToml } from '../../utils/poetry';
 
-import { checkPoetryExecutable, runPoetry } from '../utils/poetry';
-import { omit } from 'lodash';
+import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
+import { isObject, omit } from 'lodash';
 import chalk from 'chalk';
 import toml from '@iarna/toml';
 import fs from 'fs';
@@ -72,6 +72,23 @@ function addLocalProjectToPyprojectToml(context: ExecutorContext, dependencies: 
       path: path.relative(currentProjectPath.root, context.workspace.projects[dependency].root),
       develop: true,
     };
+
+    // Add any local dependencies defined in dependency's pyproject.toml
+    console.log(chalk`  {bold Adding local dependencies for defined in ${dependency}}`);
+    const dependencyPyprojectTomlPath = path.join(context.workspace.projects[dependency].root, 'pyproject.toml');
+
+    if (fs.existsSync(dependencyPyprojectTomlPath)) {
+      const dependencyParsedToml = toml.parse(fs.readFileSync(dependencyPyprojectTomlPath, 'utf-8')) as PyprojectToml;
+
+      Object.keys(dependencyParsedToml.tool.poetry.dependencies).forEach((dependencyName) => {
+        if (isObject(dependencyParsedToml.tool.poetry.dependencies[dependencyName])) {
+          parsedToml.tool.poetry.dependencies[dependencyName] = {
+            path: path.relative(currentProjectPath.root, `libs/${dependencyName}`),
+            develop: true,
+          };
+        }
+      });
+    }
 
     // Write pyproject.toml
     fs.writeFileSync(pyprojectTomlPath, toml.stringify(parsedToml));

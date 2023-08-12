@@ -24,25 +24,25 @@ export default async function (tree: Tree, schema: PoetryProjectGeneratorSchema)
     sourceRoot: target,
     targets: {
       install: {
-        executor: '@pymonorepo/nx-python:install',
+        executor: '@nx-python-poetry/nx-python:install',
         options: {},
       },
       add: {
-        executor: '@pymonorepo/nx-python:add',
+        executor: '@nx-python-poetry/nx-python:add',
         options: {
           local: false,
         },
       },
       remove: {
-        executor: '@pymonorepo/nx-python:remove',
+        executor: '@nx-python-poetry/nx-python:remove',
         options: {},
       },
       update: {
-        executor: '@pymonorepo/nx-python:update',
+        executor: '@nx-python-poetry/nx-python:update',
         options: {},
       },
       build: {
-        executor: '@pymonorepo/nx-python:build',
+        executor: '@nx-python-poetry/nx-python:build',
         options: {
           outputPath: 'dist',
           ignorePaths: [],

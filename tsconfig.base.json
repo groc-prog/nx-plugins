@@ -18,7 +18,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@pymonorepo/nx-python": [
+      "@nx-python-poetry/nx-python": [
         "libs/nx-python/src/index.ts"
       ]
     }

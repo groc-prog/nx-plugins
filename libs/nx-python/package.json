@@ -1,5 +1,5 @@
 {
-  "name": "@pymonorepo/nx-python",
+  "name": "@nx-python-poetry/nx-python",
   "version": "0.0.0",
   "private": true,
   "main": "src/index.js",

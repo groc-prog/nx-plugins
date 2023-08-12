@@ -1,7 +1,6 @@
 {
-  "name": "@pymonorepo/source",
+  "name": "@nx-python-poetry/source",
   "version": "0.0.0",
-  "license": "MIT",
   "scripts": {},
   "private": true,
   "devDependencies": {

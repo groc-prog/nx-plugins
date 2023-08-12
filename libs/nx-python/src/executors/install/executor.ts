@@ -2,13 +2,14 @@ import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
 import type { InstallExecutorSchema } from './schema';
 
-import { checkPoetryExecutable, runPoetry } from '../utils/poetry';
+import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
 import chalk from 'chalk';
 
 export default async function executor(options: InstallExecutorSchema, context: ExecutorContext) {
   process.chdir(context.root);
 
   try {
+    console.log(process.env.VIRTUAL_ENV);
     await checkPoetryExecutable();
     const projectConfig = context.workspace.projects[context.projectName];
 

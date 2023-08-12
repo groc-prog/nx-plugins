@@ -1,10 +1,10 @@
 import type { ExecutorContext } from '@nx/devkit';
 import type { BuildExecutorSchema } from './schema';
-import type { PyprojectToml } from '../utils/poetry';
+import type { PyprojectToml } from '../../utils/poetry';
 
 import { copySync, readFileSync, mkdirSync, ensureDirSync, writeFileSync, removeSync } from 'fs-extra';
 import { parse, stringify } from '@iarna/toml';
-import { checkPoetryExecutable, runPoetry } from '../utils/poetry';
+import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
 import { tmpdir } from 'os';
 import { v4 as uuidv4 } from 'uuid';
 import { isObject } from 'lodash';

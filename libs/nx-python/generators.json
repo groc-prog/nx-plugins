@@ -3,15 +3,15 @@
   "name": "nx-python",
   "version": "0.0.0",
   "generators": {
-    "migrate-to-shared-venv": {
-      "factory": "./src/generators/migrate-to-shared-venv/generator",
-      "schema": "./src/generators/migrate-to-shared-venv/schema.json",
-      "description": "Migrate Isolated Venv to Shared Venv"
+    "shared-virtual-environment": {
+      "factory": "./src/generators/shared-virtual-environment/generator",
+      "schema": "./src/generators/shared-virtual-environment/schema.json",
+      "description": "Create a shared virtual environment for Python projects."
     },
     "poetry-project": {
       "factory": "./src/generators/poetry-project/generator",
       "schema": "./src/generators/poetry-project/schema.json",
-      "description": "Create a new Python project using Poetry"
+      "description": "Create a new Python project using Poetry."
     }
   }
 }

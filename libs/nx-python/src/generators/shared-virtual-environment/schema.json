@@ -1,0 +1,14 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "SharedVirtualEnvironment",
+  "title": "Migrate NX workspace to a shared virtual environment.",
+  "type": "object",
+  "properties": {
+    "autoActivate": {
+      "type": "boolean",
+      "description": "Whether the shared virtual environment should be auto-activated when running nx-python executors.",
+      "default": true
+    }
+  },
+  "required": []
+}
