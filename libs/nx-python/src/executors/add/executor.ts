@@ -15,16 +15,16 @@ export default async function executor(options: AddExecutorSchema, context: Exec
 
   try {
     await checkPoetryExecutable();
-    const projectConfig = context.workspace.projects[context.projectName];
+    const projectContext = context.workspace.projects[context.projectName];
     const execOpts: SpawnSyncOptions = {
-      cwd: projectConfig.root,
+      cwd: projectContext.root,
       env: process.env,
     };
 
     if (options.local) {
       // Install dependencies locally
       console.log(chalk`\n  {bold Adding local dependencies: ${options.dependencies.join(', ')}}\n`);
-      addLocalProjectToPyprojectToml(context, options.dependencies);
+      addLocalProject(context, options.dependencies);
 
       // Lock dependencies
       runPoetry(['update', '--lock'], execOpts);
@@ -55,42 +55,44 @@ export default async function executor(options: AddExecutorSchema, context: Exec
  *
  * @param {ExecutorContext} context - Executor context
  * @param {string[]} dependencies - Dependencies to add
+ * @throws {Error} - Throws error if dependency is not found in the Nx workspace
+ * @returns {void}
  */
-function addLocalProjectToPyprojectToml(context: ExecutorContext, dependencies: string[]): void {
+function addLocalProject(context: ExecutorContext, dependencies: string[]): void {
   // Get current pyproject.toml file path
-  const currentProjectPath = context.workspace.projects[context.projectName];
-  const pyprojectTomlPath = path.join(currentProjectPath.root, 'pyproject.toml');
+  const projectPath = context.workspace.projects[context.projectName];
+  const projectTomlConfig = path.join(projectPath.root, 'pyproject.toml');
 
-  const parsedToml = toml.parse(fs.readFileSync(pyprojectTomlPath, 'utf-8')) as PyprojectToml;
+  const projectTomlData = toml.parse(fs.readFileSync(projectTomlConfig, 'utf-8')) as PyprojectToml;
 
   // Add dependencies to pyproject.toml
   dependencies.forEach((dependency) => {
     if (!context.workspace.projects[dependency])
       throw new Error(chalk`Project {bold ${dependency}} not found in the Nx workspace`);
 
-    parsedToml.tool.poetry.dependencies[dependency] = {
-      path: path.relative(currentProjectPath.root, context.workspace.projects[dependency].root),
+    projectTomlData.tool.poetry.dependencies[dependency] = {
+      path: path.relative(projectPath.root, context.workspace.projects[dependency].root),
       develop: true,
     };
 
     // Add any local dependencies defined in dependency's pyproject.toml
-    console.log(chalk`  {bold Adding local dependencies for defined in ${dependency}}`);
-    const dependencyPyprojectTomlPath = path.join(context.workspace.projects[dependency].root, 'pyproject.toml');
+    const dependencyTomlConfig = path.join(context.workspace.projects[dependency].root, 'pyproject.toml');
 
-    if (fs.existsSync(dependencyPyprojectTomlPath)) {
-      const dependencyParsedToml = toml.parse(fs.readFileSync(dependencyPyprojectTomlPath, 'utf-8')) as PyprojectToml;
+    if (!fs.existsSync(dependencyTomlConfig))
+      throw new Error(chalk`Project {bold ${dependency}} not found in the Nx workspace`);
 
-      Object.keys(dependencyParsedToml.tool.poetry.dependencies).forEach((dependencyName) => {
-        if (isObject(dependencyParsedToml.tool.poetry.dependencies[dependencyName])) {
-          parsedToml.tool.poetry.dependencies[dependencyName] = {
-            path: path.relative(currentProjectPath.root, `libs/${dependencyName}`),
-            develop: true,
-          };
-        }
-      });
-    }
+    const dependencyTomlData = toml.parse(fs.readFileSync(dependencyTomlConfig, 'utf-8')) as PyprojectToml;
+
+    Object.keys(dependencyTomlData.tool.poetry.dependencies).forEach((dependencyName) => {
+      if (isObject(dependencyTomlData.tool.poetry.dependencies[dependencyName])) {
+        projectTomlData.tool.poetry.dependencies[dependencyName] = {
+          path: path.relative(projectPath.root, `libs/${dependencyName}`),
+          develop: true,
+        };
+      }
+    });
 
     // Write pyproject.toml
-    fs.writeFileSync(pyprojectTomlPath, toml.stringify(parsedToml));
+    fs.writeFileSync(projectTomlConfig, toml.stringify(projectTomlData));
   });
 }

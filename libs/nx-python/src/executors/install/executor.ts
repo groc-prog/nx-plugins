@@ -11,14 +11,14 @@ export default async function executor(options: InstallExecutorSchema, context: 
   try {
     console.log(process.env.VIRTUAL_ENV);
     await checkPoetryExecutable();
-    const projectConfig = context.workspace.projects[context.projectName];
+    const projectContext = context.workspace.projects[context.projectName];
 
     // Add any additional arguments to the command
     const installArgs = ['install'];
     installArgs.push(...Object.entries(options).map(([key, value]) => `--${key}=${value}`));
 
     const execOpts: SpawnSyncOptions = {
-      cwd: projectConfig.root,
+      cwd: projectContext.root,
       env: process.env,
     };
 

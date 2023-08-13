@@ -156,7 +156,7 @@ develop = true
 
 [package.source]
 type = "directory"
-url = "../../libs/l-b"
+url = "../l-b"
 
 [[package]]
 name = "lazy-object-proxy"
@@ -447,4 +447,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "ed8b51eb6e3c5907d605c988437e06bc2db3c4e580852de409a634db2c8c507a"
+content-hash = "acfc45c93b7d0e1ebea3028533cacef14561079b101d13201439ff5519206c8d"

@@ -10,6 +10,11 @@
         "type": "string"
       },
       "description": "Dependencies to remove."
+    },
+    "local": {
+      "type": "boolean",
+      "description": "Whether the dependencies are local libs or not.",
+      "default": false
     }
   },
   "required": ["dependencies"]

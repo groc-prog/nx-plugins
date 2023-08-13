@@ -11,7 +11,7 @@ export default async function executor(options: UpdateExecutorSchema, context: E
 
   try {
     await checkPoetryExecutable();
-    const projectConfig = context.workspace.projects[context.projectName];
+    const projectContext = context.workspace.projects[context.projectName];
 
     const updateArgs = ['update'];
     const additionalArgs = omit(options, ['dependencies']);
@@ -23,7 +23,7 @@ export default async function executor(options: UpdateExecutorSchema, context: E
     );
 
     const execOpts: SpawnSyncOptions = {
-      cwd: projectConfig.root,
+      cwd: projectContext.root,
       env: process.env,
     };
 

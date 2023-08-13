@@ -1,18 +1,18 @@
 [tool.poetry]
-name = "s-a"
+name = "l-c"
 version = "0.0.0"
 description = ""
 authors = [ ]
 readme = "README.md"
 
   [[tool.poetry.packages]]
-  include = "s_a"
+  include = "l_c"
 
   [tool.poetry.dependencies]
   python = "^3.10"
 
     [tool.poetry.dependencies.l-b]
-    path = "../../libs/l-b"
+    path = "../l-b"
     develop = true
 
 [tool.poetry.group.dev.dependencies]
