@@ -1,8 +1,8 @@
 {
-  "name": "test-proj",
+  "name": "a",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "projectType": "application",
-  "sourceRoot": "services/test-proj",
+  "sourceRoot": "services/a",
   "targets": {
     "install": {
       "executor": "@nx-python-poetry/nx-python:install",
@@ -31,6 +31,10 @@
     },
     "black": {
       "executor": "@nx-python-poetry/nx-python:black",
+      "options": {}
+    },
+    "pylint": {
+      "executor": "@nx-python-poetry/nx-python:pylint",
       "options": {}
     }
   }

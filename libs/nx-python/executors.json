@@ -30,6 +30,11 @@
       "implementation": "./src/executors/black/executor",
       "schema": "./src/executors/black/schema.json",
       "description": "black executor"
+    },
+    "pylint": {
+      "implementation": "./src/executors/pylint/executor",
+      "schema": "./src/executors/pylint/schema.json",
+      "description": "pylint executor"
     }
   }
 }

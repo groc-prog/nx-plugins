@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "test-proj"
+name = "a"
 version = "0.0.0"
 description = ""
 authors = [ ]
 readme = 'README.md'
-packages = [{include = "test_proj"}]
+packages = [{include = "a"}]
 
   [tool.poetry.dependencies]
   python = "^3.10"
@@ -18,7 +18,12 @@ packages = [{include = "test_proj"}]
   line-length = 120
   target-version = ["py310"]
   workers = 4
-  exclude = "tests"
+  extend-exclude="""
+  (
+    ^/tests
+    | ^/.venv
+  )
+  """
 
 [build-system]
 requires = ["poetry-core"]

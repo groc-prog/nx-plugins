@@ -52,6 +52,10 @@ export default async function (tree: Tree, schema: PoetryProjectGeneratorSchema)
         executor: '@nx-python-poetry/nx-python:black',
         options: {},
       },
+      pylint: {
+        executor: '@nx-python-poetry/nx-python:pylint',
+        options: {},
+      },
     },
   });
   generateFiles(tree, path.join(__dirname, 'files'), target, {
