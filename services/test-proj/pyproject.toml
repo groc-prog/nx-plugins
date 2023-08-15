@@ -1,14 +1,13 @@
 [tool.poetry]
-name = "l-b"
+name = "test-proj"
 version = "0.0.0"
 description = ""
 authors = [ ]
 readme = 'README.md'
-packages = [{include = "l_b"}]
+packages = [{include = "test_proj"}]
 
   [tool.poetry.dependencies]
   python = "^3.10"
-  pyjwt = "^2.8.0"
 
   [tool.poetry.group.dev.dependencies]
   pylint = "^2.17.5"

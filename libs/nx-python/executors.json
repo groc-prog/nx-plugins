@@ -25,6 +25,11 @@
       "implementation": "./src/executors/remove/executor",
       "schema": "./src/executors/remove/schema.json",
       "description": "Wrapper for Poetry's remove command."
+    },
+    "black": {
+      "implementation": "./src/executors/black/executor",
+      "schema": "./src/executors/black/schema.json",
+      "description": "black executor"
     }
   }
 }

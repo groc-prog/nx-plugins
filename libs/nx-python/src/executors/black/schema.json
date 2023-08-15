@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Black formatter executor",
+  "description": "",
+  "type": "object",
+  "properties": {},
+  "required": []
+}

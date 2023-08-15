@@ -1,8 +1,8 @@
 {
-  "name": "l-c",
+  "name": "test-proj",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "projectType": "library",
-  "sourceRoot": "libs/l-c",
+  "projectType": "application",
+  "sourceRoot": "services/test-proj",
   "targets": {
     "install": {
       "executor": "@nx-python-poetry/nx-python:install",
@@ -28,6 +28,10 @@
         "outputPath": "dist",
         "ignorePaths": []
       }
+    },
+    "black": {
+      "executor": "@nx-python-poetry/nx-python:black",
+      "options": {}
     }
   }
 }

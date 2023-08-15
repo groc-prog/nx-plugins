@@ -48,6 +48,10 @@ export default async function (tree: Tree, schema: PoetryProjectGeneratorSchema)
           ignorePaths: [],
         },
       },
+      black: {
+        executor: '@nx-python-poetry/nx-python:black',
+        options: {},
+      },
     },
   });
   generateFiles(tree, path.join(__dirname, 'files'), target, {

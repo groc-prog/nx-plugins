@@ -80,31 +80,34 @@ export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void 
  * @param {ExecutorContext} context - Executor context.
  */
 export function updateSharedEnvironment(context: ExecutorContext): void {
-  console.log(chalk.blue.bold('\nUpdating shared virtual environment...\n'));
   const rootTomlPath = path.join(context.root, 'pyproject.toml');
-  const rootTomlConfig = toml.parse(fs.readFileSync(rootTomlPath, 'utf-8')) as PyProjectToml;
 
-  // Reset dependencies so unused dependencies are removed
-  rootTomlConfig.tool.poetry.dependencies = {};
-  if (get(rootTomlConfig, 'tool.poetry.group.dev.dependencies', null) !== null)
-    set(rootTomlConfig, 'tool.poetry.group.dev.dependencies', {});
+  if (existsSync(rootTomlPath)) {
+    console.log(chalk.blue.bold('\nUpdating shared virtual environment...\n'));
+    const rootTomlConfig = toml.parse(fs.readFileSync(rootTomlPath, 'utf-8')) as PyProjectToml;
 
-  Object.keys(context.workspace.projects).forEach((project) => {
-    const projectTomlPath = path.join(context.workspace.projects[project].root, 'pyproject.toml');
+    // Reset dependencies so unused dependencies are removed
+    rootTomlConfig.tool.poetry.dependencies = {};
+    if (get(rootTomlConfig, 'tool.poetry.group.dev.dependencies', null) !== null)
+      set(rootTomlConfig, 'tool.poetry.group.dev.dependencies', {});
 
-    if (!existsSync(projectTomlPath)) return;
+    Object.keys(context.workspace.projects).forEach((project) => {
+      const projectTomlPath = path.join(context.workspace.projects[project].root, 'pyproject.toml');
 
-    const projectTomlConfig = toml.parse(fs.readFileSync(projectTomlPath, 'utf-8')) as PyProjectToml;
-    addSharedDependencies(rootTomlConfig, projectTomlConfig);
-  });
+      if (!existsSync(projectTomlPath)) return;
 
-  fs.writeFileSync(rootTomlPath, toml.stringify(rootTomlConfig));
-  runPoetry(['lock'], {
-    cwd: context.root,
-    env: process.env,
-  });
+      const projectTomlConfig = toml.parse(fs.readFileSync(projectTomlPath, 'utf-8')) as PyProjectToml;
+      addSharedDependencies(rootTomlConfig, projectTomlConfig);
+    });
 
-  console.log(chalk.green.bold('\nShared virtual environment updated successfully!\n'));
+    fs.writeFileSync(rootTomlPath, toml.stringify(rootTomlConfig));
+    runPoetry(['lock'], {
+      cwd: context.root,
+      env: process.env,
+    });
+
+    console.log(chalk.green.bold('\nShared virtual environment updated successfully!\n'));
+  }
 }
 
 /**

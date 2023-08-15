@@ -1,4 +1,4 @@
-# l-a
+# test-proj
 
 ## ⚡️ Next steps
 
