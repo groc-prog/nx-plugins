@@ -1,58 +1,97 @@
-import type { SharedVirtualEnvironmentSchema } from './schema';
+import type { PyProjectToml } from '../../utils/poetry';
+import type { Tree } from '@nx/devkit';
 
-import { Tree, formatFiles, generateFiles, installPackagesTask } from '@nx/devkit';
+import { formatFiles, generateFiles, installPackagesTask } from '@nx/devkit';
 import { existsSync } from 'fs-extra';
 import { parse, stringify } from '@iarna/toml';
 import path from 'path';
-import { PyprojectToml } from '../../utils/poetry';
-import { isObject } from 'lodash';
+import chalk from 'chalk';
+import { get, isObject, set } from 'lodash';
 
-export default async function (tree: Tree, schema: SharedVirtualEnvironmentSchema) {
+export default async function (tree: Tree) {
   const config = JSON.parse(tree.read('package.json').toString());
 
   generateFiles(tree, path.join(__dirname, 'files'), '.', {
     projectName: config.name,
-    autoActivate: schema.autoActivate,
   });
 
   // Update dependencies in root pyproject.toml
-  const rootPyProjectTomlData = parse(tree.read('pyproject.toml').toString()) as PyprojectToml;
+  const rootTomlConfig = parse(tree.read('pyproject.toml').toString()) as PyProjectToml;
 
+  console.log(chalk`{bold Adding dependencies from libs}`);
   tree.children('libs').forEach((lib) => {
-    const pyProjectTomlPath = path.join('libs', lib, 'pyproject.toml');
+    const projectTomlPath = path.join('libs', lib, 'pyproject.toml');
 
-    if (existsSync(pyProjectTomlPath)) {
-      // Get pyproject.toml file contents
-      const pyProjectTomlData = parse(tree.read(pyProjectTomlPath).toString()) as PyprojectToml;
+    if (existsSync(projectTomlPath)) {
+      const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
 
-      Object.keys(pyProjectTomlData.tool.poetry.dependencies).forEach((dependencyName) => {
-        const rootDependency = rootPyProjectTomlData.tool.poetry.dependencies[dependencyName];
-        const projectDependency = pyProjectTomlData.tool.poetry.dependencies[dependencyName];
+      addSharedDependencies(rootTomlConfig, projectTomlConfig);
 
-        // Check for dependency version mismatch
-        if (rootDependency && projectDependency && rootDependency !== projectDependency)
-          throw new Error(
-            `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${lib}
-            and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
-          );
-
-        // Add dependency or local lib to root pyproject.toml
-        if (isObject(projectDependency) && projectDependency.path) {
-          pyProjectTomlData.tool.poetry.dependencies[dependencyName] = {
-            path: `libs/${lib}`,
-            develop: true,
-          };
-        } else {
-          rootPyProjectTomlData.tool.poetry.dependencies[dependencyName] = projectDependency;
-        }
-      });
+      if (rootTomlConfig.tool.poetry.dependencies[projectTomlConfig.tool.poetry.name] === undefined) {
+        rootTomlConfig.tool.poetry.dependencies[projectTomlConfig.tool.poetry.name] = {
+          path: path.join('libs', lib),
+          develop: true,
+        };
+      }
     }
   });
 
-  tree.write('pyproject.toml', stringify(rootPyProjectTomlData));
+  console.log(chalk`{bold Adding dependencies from services}`);
+  tree.children('services').forEach((service) => {
+    const projectTomlPath = path.join('services', service, 'pyproject.toml');
+
+    if (existsSync(projectTomlPath)) {
+      const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
+      addSharedDependencies(rootTomlConfig, projectTomlConfig);
+    }
+  });
+
+  tree.write('pyproject.toml', stringify(rootTomlConfig));
 
   await formatFiles(tree);
   return () => {
     installPackagesTask(tree);
   };
+}
+
+function addSharedDependencies(rootTomlConfig: PyProjectToml, projectTomlConfig: PyProjectToml): void {
+  // Add shared dependencies
+  Object.keys(projectTomlConfig.tool.poetry.dependencies).forEach((dependencyName) => {
+    const rootDependency = rootTomlConfig.tool.poetry.dependencies[dependencyName];
+    const projectDependency = projectTomlConfig.tool.poetry.dependencies[dependencyName];
+
+    // Skip local dependencies, added later on
+    if (isObject(projectDependency) || isObject(rootDependency)) return;
+
+    if (rootDependency && projectDependency && rootDependency !== projectDependency)
+      throw new Error(
+        `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
+        and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
+      );
+
+    if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;
+  });
+
+  if (get(projectTomlConfig, 'tool.poetry.group.dev.dependencies', null) !== null) {
+    if (get(rootTomlConfig, 'tool.poetry.group.dev.dependencies', null) === null)
+      set(rootTomlConfig, 'tool.poetry.group.dev.dependencies', {});
+
+    // Add shared dev dependencies
+    Object.keys(projectTomlConfig.tool.poetry.group.dev.dependencies).forEach((dependencyName) => {
+      const rootDependency = rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
+      const projectDependency = projectTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
+
+      // Skip local dependencies, added later on
+      if (isObject(projectDependency) || isObject(rootDependency)) return;
+
+      if (rootDependency && projectDependency && rootDependency !== projectDependency)
+        throw new Error(
+          `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
+          and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
+        );
+
+      if (rootDependency === undefined)
+        rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName] = projectDependency;
+    });
+  }
 }

@@ -1,7 +1,7 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
 import type { AddExecutorSchema } from './schema';
-import type { PyprojectToml } from '../../utils/poetry';
+import type { PyProjectToml } from '../../utils/poetry';
 
 import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
 import { isObject, omit } from 'lodash';
@@ -63,7 +63,7 @@ function addLocalProject(context: ExecutorContext, dependencies: string[]): void
   const projectPath = context.workspace.projects[context.projectName];
   const projectTomlConfig = path.join(projectPath.root, 'pyproject.toml');
 
-  const projectTomlData = toml.parse(fs.readFileSync(projectTomlConfig, 'utf-8')) as PyprojectToml;
+  const projectTomlData = toml.parse(fs.readFileSync(projectTomlConfig, 'utf-8')) as PyProjectToml;
 
   // Add dependencies to pyproject.toml
   dependencies.forEach((dependency) => {
@@ -81,7 +81,7 @@ function addLocalProject(context: ExecutorContext, dependencies: string[]): void
     if (!fs.existsSync(dependencyTomlConfig))
       throw new Error(chalk`Project {bold ${dependency}} not found in the Nx workspace`);
 
-    const dependencyTomlData = toml.parse(fs.readFileSync(dependencyTomlConfig, 'utf-8')) as PyprojectToml;
+    const dependencyTomlData = toml.parse(fs.readFileSync(dependencyTomlConfig, 'utf-8')) as PyProjectToml;
 
     Object.keys(dependencyTomlData.tool.poetry.dependencies).forEach((dependencyName) => {
       if (isObject(dependencyTomlData.tool.poetry.dependencies[dependencyName])) {

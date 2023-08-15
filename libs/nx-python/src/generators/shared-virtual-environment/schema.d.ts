@@ -1,3 +1,1 @@
-export interface SharedVirtualEnvironmentSchema {
-  autoActivate: boolean;
-}
+export interface SharedVirtualEnvironmentSchema {}

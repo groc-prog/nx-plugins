@@ -3,51 +3,32 @@ import type { SpawnSyncOptions } from 'child_process';
 import chalk from 'chalk';
 import spawn from 'cross-spawn';
 import commandExists from 'command-exists';
-import path from 'path';
-import { existsSync } from 'fs-extra';
 
-export type PyprojectTomlDependency =
+export type PyProjectTomlDependency =
   | string
   | {
       path?: string;
       develop?: boolean;
     };
 
-export type PyprojectTomlDependencies = {
-  [key: string]: PyprojectTomlDependency;
+export type PyProjectTomlDependencies = {
+  [key: string]: PyProjectTomlDependency;
 };
 
-export type PyprojectTomlSource = {
-  name: string;
-  url: string;
-};
-
-export type PyprojectToml = {
+export type PyProjectToml = {
   tool?: {
-    nx?: {
-      autoActivate?: boolean;
-    };
     poetry?: {
       name: string;
       version: string;
       packages?: Array<{
         include: string;
       }>;
-      dependencies?: PyprojectTomlDependencies;
+      dependencies?: PyProjectTomlDependencies;
       group?: {
         [key: string]: {
-          dependencies: PyprojectTomlDependencies;
+          dependencies: PyProjectTomlDependencies;
         };
       };
-      extras?: {
-        [key: string]: string[];
-      };
-      plugins?: {
-        [key: string]: {
-          [key: string]: string;
-        };
-      };
-      source?: PyprojectTomlSource[];
     };
   };
 };
@@ -100,7 +81,7 @@ export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void 
 //     const rootPyproject = path.join(workspaceRoot, 'pyproject.toml');
 
 //     if (fs.existsSync(rootPyproject)) {
-//       const rootConfig = parse(fs.readFileSync(rootPyproject, 'utf-8')) as PyprojectToml;
+//       const rootConfig = parse(fs.readFileSync(rootPyproject, 'utf-8')) as PyProjectToml;
 //       const autoActivate = rootConfig.tool.nx?.autoActivate ?? false;
 //       if (autoActivate) {
 //         console.log(chalk`\n{bold shared virtual environment detected and not activated, activating...}\n\n`);

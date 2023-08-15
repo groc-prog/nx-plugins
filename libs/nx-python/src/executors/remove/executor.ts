@@ -2,7 +2,7 @@ import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
 import type { RemoveExecutorSchema } from './schema';
 
-import { PyprojectToml, checkPoetryExecutable, runPoetry } from '../../utils/poetry';
+import { PyProjectToml, checkPoetryExecutable, runPoetry } from '../../utils/poetry';
 import { isObject, omit } from 'lodash';
 import { parse, stringify } from '@iarna/toml';
 import fs from 'fs';
@@ -54,7 +54,7 @@ export default async function executor(options: RemoveExecutorSchema, context: E
 function checkLocalDependencyRemovable(context: ExecutorContext): void {
   const foundDependencies: Record<string, number> = {};
   const projectTomlConfig = path.join(context.workspace.projects[context.projectName].root, 'pyproject.toml');
-  const projectTomlData = parse(fs.readFileSync(projectTomlConfig).toString()) as PyprojectToml;
+  const projectTomlData = parse(fs.readFileSync(projectTomlConfig).toString()) as PyProjectToml;
 
   // Filter out local dependencies
   const localDependencies = Object.keys(projectTomlData.tool.poetry.dependencies).filter((dependency) =>
@@ -64,7 +64,7 @@ function checkLocalDependencyRemovable(context: ExecutorContext): void {
   // Check if local dependencies are used by other projects or if they can be removed
   localDependencies.forEach((dependency) => {
     const dependencyTomlConfig = path.join(context.workspace.projects[dependency].root, 'pyproject.toml');
-    const dependencyTomlData = parse(fs.readFileSync(dependencyTomlConfig).toString()) as PyprojectToml;
+    const dependencyTomlData = parse(fs.readFileSync(dependencyTomlConfig).toString()) as PyProjectToml;
 
     Object.keys(dependencyTomlData.tool.poetry.dependencies).forEach((dependencyName: string) => {
       if (isObject(dependencyTomlData.tool.poetry.dependencies[dependencyName])) {
