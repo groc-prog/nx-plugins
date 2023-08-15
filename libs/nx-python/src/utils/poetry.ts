@@ -1,8 +1,14 @@
 import type { SpawnSyncOptions } from 'child_process';
+import type { ExecutorContext } from '@nx/devkit';
 
+import { get, isObject, set } from 'lodash';
 import chalk from 'chalk';
 import spawn from 'cross-spawn';
 import commandExists from 'command-exists';
+import toml from '@iarna/toml';
+import path from 'path';
+import fs from 'fs';
+import { existsSync } from 'fs-extra';
 
 export type PyProjectTomlDependency =
   | string
@@ -56,7 +62,7 @@ export async function checkPoetryExecutable(): Promise<void> {
  */
 export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void {
   const commandStr = `${POETRY_EXECUTABLE} ${args.join(' ')}`;
-  console.log(chalk`Running command {bold ${commandStr}}`);
+  console.log(chalk.bold(`\nRunning ${commandStr}\n`));
 
   const result = spawn.sync(POETRY_EXECUTABLE, args, {
     ...options,
@@ -68,27 +74,84 @@ export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void 
   if (result.status !== 0) throw new Error(`${commandStr} command failed with exit code ${result.status}`);
 }
 
-// export function checkSharedVenv(workspaceRoot: string): void {
-//   const workspacePyProjectToml = path.join(workspaceRoot, 'pyproject.toml');
+/**
+ * Updates the shared virtual environment with the latest dependencies.
+ *
+ * @param {ExecutorContext} context - Executor context.
+ */
+export function updateSharedEnvironment(context: ExecutorContext): void {
+  console.log(chalk.blue.bold('\nUpdating shared virtual environment...\n'));
+  const rootTomlPath = path.join(context.root, 'pyproject.toml');
+  const rootTomlConfig = toml.parse(fs.readFileSync(rootTomlPath, 'utf-8')) as PyProjectToml;
 
-//   if (existsSync(workspacePyProjectToml)) {
+  // Reset dependencies so unused dependencies are removed
+  rootTomlConfig.tool.poetry.dependencies = {};
+  if (get(rootTomlConfig, 'tool.poetry.group.dev.dependencies', null) !== null)
+    set(rootTomlConfig, 'tool.poetry.group.dev.dependencies', {});
 
-//   }
-// }
-// export function activateVenv(workspaceRoot: string) {
-//   if (!process.env.VIRTUAL_ENV) {
-//     const rootPyproject = path.join(workspaceRoot, 'pyproject.toml');
+  Object.keys(context.workspace.projects).forEach((project) => {
+    const projectTomlPath = path.join(context.workspace.projects[project].root, 'pyproject.toml');
 
-//     if (fs.existsSync(rootPyproject)) {
-//       const rootConfig = parse(fs.readFileSync(rootPyproject, 'utf-8')) as PyProjectToml;
-//       const autoActivate = rootConfig.tool.nx?.autoActivate ?? false;
-//       if (autoActivate) {
-//         console.log(chalk`\n{bold shared virtual environment detected and not activated, activating...}\n\n`);
-//         const virtualEnv = path.resolve(workspaceRoot, '.venv');
-//         process.env.VIRTUAL_ENV = virtualEnv;
-//         process.env.PATH = `${virtualEnv}/bin:${process.env.PATH}`;
-//         delete process.env.PYTHONHOME;
-//       }
-//     }
-//   }
-// }
+    if (!existsSync(projectTomlPath)) return;
+
+    const projectTomlConfig = toml.parse(fs.readFileSync(projectTomlPath, 'utf-8')) as PyProjectToml;
+    addSharedDependencies(rootTomlConfig, projectTomlConfig);
+  });
+
+  fs.writeFileSync(rootTomlPath, toml.stringify(rootTomlConfig));
+  runPoetry(['lock'], {
+    cwd: context.root,
+    env: process.env,
+  });
+
+  console.log(chalk.green.bold('\nShared virtual environment updated successfully!\n'));
+}
+
+/**
+ * Adds shared dependencies to the root pyproject.toml file.
+ *
+ * @param {PyProjectToml} rootTomlConfig - Root pyproject.toml file.
+ * @param {PyProjectToml} projectTomlConfig - Project pyproject.toml file.
+ * @throws {Error} If dependency version mismatch is detected.
+ */
+export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectTomlConfig: PyProjectToml): void {
+  // Add shared dependencies
+  Object.keys(projectTomlConfig.tool.poetry.dependencies).forEach((dependencyName) => {
+    const rootDependency = rootTomlConfig.tool.poetry.dependencies[dependencyName];
+    const projectDependency = projectTomlConfig.tool.poetry.dependencies[dependencyName];
+
+    // Skip local dependencies, added later on
+    if (isObject(projectDependency) || isObject(rootDependency)) return;
+
+    if (rootDependency && projectDependency && rootDependency !== projectDependency)
+      throw new Error(
+        `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
+        and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
+      );
+
+    if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;
+  });
+
+  if (get(projectTomlConfig, 'tool.poetry.group.dev.dependencies', null) !== null) {
+    if (get(rootTomlConfig, 'tool.poetry.group.dev.dependencies', null) === null)
+      set(rootTomlConfig, 'tool.poetry.group.dev.dependencies', {});
+
+    // Add shared dev dependencies
+    Object.keys(projectTomlConfig.tool.poetry.group.dev.dependencies).forEach((dependencyName) => {
+      const rootDependency = rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
+      const projectDependency = projectTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
+
+      // Skip local dependencies, added later on
+      if (isObject(projectDependency) || isObject(rootDependency)) return;
+
+      if (rootDependency && projectDependency && rootDependency !== projectDependency)
+        throw new Error(
+          `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
+          and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
+        );
+
+      if (rootDependency === undefined)
+        rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName] = projectDependency;
+    });
+  }
+}

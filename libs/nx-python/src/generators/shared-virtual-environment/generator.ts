@@ -1,12 +1,12 @@
-import { runPoetry, type PyProjectToml } from '../../utils/poetry';
+import type { PyProjectToml } from '../../utils/poetry';
 import type { Tree } from '@nx/devkit';
 
 import { formatFiles, generateFiles, installPackagesTask } from '@nx/devkit';
 import { existsSync } from 'fs-extra';
 import { parse, stringify } from '@iarna/toml';
+import { runPoetry, addSharedDependencies } from '../../utils/poetry';
 import path from 'path';
 import chalk from 'chalk';
-import { get, isObject, set } from 'lodash';
 
 export default async function (tree: Tree) {
   process.chdir(tree.root);
@@ -20,7 +20,7 @@ export default async function (tree: Tree) {
   // Update dependencies in root pyproject.toml
   const rootTomlConfig = parse(tree.read('pyproject.toml').toString()) as PyProjectToml;
 
-  console.log(chalk.bold('Adding dependencies from libs...'));
+  console.log(chalk.bold('\nAdding dependencies from libs...'));
   tree.children('libs').forEach((lib) => {
     const projectTomlPath = path.join('libs', lib, 'pyproject.toml');
 
@@ -38,7 +38,7 @@ export default async function (tree: Tree) {
     }
   });
 
-  console.log(chalk.bold('Adding dependencies from services...'));
+  console.log(chalk.bold('\nAdding dependencies from services...'));
   tree.children('services').forEach((service) => {
     const projectTomlPath = path.join('services', service, 'pyproject.toml');
 
@@ -56,46 +56,4 @@ export default async function (tree: Tree) {
     installPackagesTask(tree);
     runPoetry(['install']);
   };
-}
-
-function addSharedDependencies(rootTomlConfig: PyProjectToml, projectTomlConfig: PyProjectToml): void {
-  // Add shared dependencies
-  Object.keys(projectTomlConfig.tool.poetry.dependencies).forEach((dependencyName) => {
-    const rootDependency = rootTomlConfig.tool.poetry.dependencies[dependencyName];
-    const projectDependency = projectTomlConfig.tool.poetry.dependencies[dependencyName];
-
-    // Skip local dependencies, added later on
-    if (isObject(projectDependency) || isObject(rootDependency)) return;
-
-    if (rootDependency && projectDependency && rootDependency !== projectDependency)
-      throw new Error(
-        `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
-        and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
-      );
-
-    if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;
-  });
-
-  if (get(projectTomlConfig, 'tool.poetry.group.dev.dependencies', null) !== null) {
-    if (get(rootTomlConfig, 'tool.poetry.group.dev.dependencies', null) === null)
-      set(rootTomlConfig, 'tool.poetry.group.dev.dependencies', {});
-
-    // Add shared dev dependencies
-    Object.keys(projectTomlConfig.tool.poetry.group.dev.dependencies).forEach((dependencyName) => {
-      const rootDependency = rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
-      const projectDependency = projectTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
-
-      // Skip local dependencies, added later on
-      if (isObject(projectDependency) || isObject(rootDependency)) return;
-
-      if (rootDependency && projectDependency && rootDependency !== projectDependency)
-        throw new Error(
-          `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
-          and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
-        );
-
-      if (rootDependency === undefined)
-        rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName] = projectDependency;
-    });
-  }
 }

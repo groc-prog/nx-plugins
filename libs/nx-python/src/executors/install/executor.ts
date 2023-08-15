@@ -25,7 +25,7 @@ export default async function executor(options: InstallExecutorSchema, context: 
     console.log(chalk.bold('Installing dependencies ...'));
     runPoetry(installArgs, execOpts);
 
-    console.log(chalk.green.bold(`\n✅ Successfully installed dependencies for ${context.projectName}!`));
+    console.log(chalk.green.bold(`\n🎉 Successfully installed dependencies for ${context.projectName}!`));
     return { success: true };
   } catch (error) {
     console.error(chalk.red(`\n❌ Failed to install dependencies for ${context.projectName}!`));

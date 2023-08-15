@@ -2,7 +2,7 @@ import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
 import type { RemoveExecutorSchema } from './schema';
 
-import { PyProjectToml, checkPoetryExecutable, runPoetry } from '../../utils/poetry';
+import { PyProjectToml, checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
 import { isObject, omit } from 'lodash';
 import { parse, stringify } from '@iarna/toml';
 import fs from 'fs';
@@ -37,7 +37,9 @@ export default async function executor(options: RemoveExecutorSchema, context: E
     runPoetry(removeArgs, execOpts);
     runPoetry(['lock'], execOpts);
 
-    console.log(chalk.green(`\n✅ Successfully removed dependencies from ${context.projectName}!`));
+    updateSharedEnvironment(context);
+
+    console.log(chalk.green(`\n🎉 Successfully removed dependencies from ${context.projectName}!`));
     return { success: true };
   } catch (error) {
     console.error(chalk.red(`\n❌ Failed to remove dependencies from ${context.projectName}!`));

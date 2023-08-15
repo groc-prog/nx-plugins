@@ -43,7 +43,7 @@ export default async function executor(options: BuildExecutorSchema, context: Ex
     copySync(path.join(tmpBuildFolderPath, 'dist'), buildFolderPath, { overwrite: true });
     removeSync(tmpBuildFolderPath);
 
-    console.log(chalk.green(`\n✅ Successfully built ${context.projectName}!`));
+    console.log(chalk.green(`\n🎉 Successfully built ${context.projectName}!`));
     return { success: true };
   } catch (error) {
     console.error(chalk.red(`\n❌ Failed to build ${context.projectName}!`));

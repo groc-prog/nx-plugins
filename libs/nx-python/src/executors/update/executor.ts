@@ -31,7 +31,7 @@ export default async function executor(options: UpdateExecutorSchema, context: E
     console.log(chalk.bold(`Updating dependencies ${options.dependencies.join(', ')}...`));
     runPoetry(updateArgs, execOpts);
 
-    console.log(chalk.green(`\n✅ Successfully updated dependencies in ${context.projectName}`));
+    console.log(chalk.green(`\n🎉 Successfully updated dependencies in ${context.projectName}`));
     return { success: true };
   } catch (error) {
     console.error(chalk.red(`\n❌ Failed to update dependencies in ${context.projectName}`));
