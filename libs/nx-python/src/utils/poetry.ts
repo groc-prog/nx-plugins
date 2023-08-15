@@ -65,8 +65,7 @@ export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void 
     maxBuffer: 1024 * 1024 * 10,
   });
 
-  if (result.status !== 0)
-    throw new Error(chalk`{bold ${commandStr}} command failed with exit code {bold ${result.status}}`);
+  if (result.status !== 0) throw new Error(`${commandStr} command failed with exit code ${result.status}`);
 }
 
 // export function checkSharedVenv(workspaceRoot: string): void {

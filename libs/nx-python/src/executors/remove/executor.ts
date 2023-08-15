@@ -15,6 +15,7 @@ export default async function executor(options: RemoveExecutorSchema, context: E
   try {
     await checkPoetryExecutable();
     const projectContext = context.workspace.projects[context.projectName];
+    console.log(chalk.blue(`\n🧹 Removing dependencies from ${context.projectName}\n`));
 
     const removeArgs = ['remove'];
     const additionalArgs = omit(options, ['dependencies', 'local']);
@@ -30,16 +31,17 @@ export default async function executor(options: RemoveExecutorSchema, context: E
       env: process.env,
     };
 
-    console.log(chalk`\n  {bold Removing dependencies: ${options.dependencies.join(', ')}}\n`);
     if (options.local) checkLocalDependencyRemovable(context);
 
+    console.log(chalk.bold(`Removing dependencies ${options.dependencies.join(', ')}...`));
     runPoetry(removeArgs, execOpts);
     runPoetry(['lock'], execOpts);
 
-    console.log(chalk`\n  {green Dependencies have been successfully removed from the project}\n`);
+    console.log(chalk.green(`\n✅ Successfully removed dependencies from ${context.projectName}!`));
     return { success: true };
   } catch (error) {
-    console.error(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
+    console.error(chalk.red(`\n❌ Failed to remove dependencies from ${context.projectName}!`));
+    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
     return { success: false };
   }
 }
@@ -52,6 +54,7 @@ export default async function executor(options: RemoveExecutorSchema, context: E
  * @returns {void}
  */
 function checkLocalDependencyRemovable(context: ExecutorContext): void {
+  console.log(chalk.bold('Checking if local dependencies can be removed...'));
   const foundDependencies: Record<string, number> = {};
   const projectTomlConfig = path.join(context.workspace.projects[context.projectName].root, 'pyproject.toml');
   const projectTomlData = parse(fs.readFileSync(projectTomlConfig).toString()) as PyProjectToml;

@@ -12,6 +12,7 @@ export default async function executor(options: UpdateExecutorSchema, context: E
   try {
     await checkPoetryExecutable();
     const projectContext = context.workspace.projects[context.projectName];
+    console.log(chalk.blue.bold(`\n🚀 Updating dependencies for ${context.projectName}\n`));
 
     const updateArgs = ['update'];
     const additionalArgs = omit(options, ['dependencies']);
@@ -27,13 +28,14 @@ export default async function executor(options: UpdateExecutorSchema, context: E
       env: process.env,
     };
 
-    console.log(chalk`\n  {bold Updating dependencies: ${options.dependencies.join(', ')}}\n`);
+    console.log(chalk.bold(`Updating dependencies ${options.dependencies.join(', ')}...`));
     runPoetry(updateArgs, execOpts);
 
-    console.log(chalk`\n  {green Dependencies have been successfully updated}\n`);
+    console.log(chalk.green(`\n✅ Successfully updated dependencies in ${context.projectName}`));
     return { success: true };
   } catch (error) {
-    console.error(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
+    console.error(chalk.red(`\n❌ Failed to update dependencies in ${context.projectName}`));
+    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
     return { success: false };
   }
 }

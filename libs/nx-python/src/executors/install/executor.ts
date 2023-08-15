@@ -9,9 +9,9 @@ export default async function executor(options: InstallExecutorSchema, context: 
   process.chdir(context.root);
 
   try {
-    console.log(process.env.VIRTUAL_ENV);
     await checkPoetryExecutable();
     const projectContext = context.workspace.projects[context.projectName];
+    console.log(chalk.blue.bold(`\n🚀 Installing dependencies for ${context.projectName}\n`));
 
     // Add any additional arguments to the command
     const installArgs = ['install'];
@@ -22,13 +22,14 @@ export default async function executor(options: InstallExecutorSchema, context: 
       env: process.env,
     };
 
-    console.log(chalk`\n  {bold Installing dependencies...}\n`);
+    console.log(chalk.bold('Installing dependencies ...'));
     runPoetry(installArgs, execOpts);
 
-    console.log(chalk`\n  {green Dependencies have been successfully installed}\n`);
+    console.log(chalk.green.bold(`\n✅ Successfully installed dependencies for ${context.projectName}!`));
     return { success: true };
   } catch (error) {
-    console.error(chalk`\n  {bgRed.bold  ERROR } ${error.message}\n`);
+    console.error(chalk.red(`\n❌ Failed to install dependencies for ${context.projectName}!`));
+    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
     return { success: false };
   }
 }

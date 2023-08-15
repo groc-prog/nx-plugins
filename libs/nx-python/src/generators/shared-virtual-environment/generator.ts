@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import { get, isObject, set } from 'lodash';
 
 export default async function (tree: Tree) {
+  console.log(chalk.blue.bold(`\n🚀 Migrating to a shared virtual environment\n`));
   const config = JSON.parse(tree.read('package.json').toString());
 
   generateFiles(tree, path.join(__dirname, 'files'), '.', {
@@ -18,13 +19,13 @@ export default async function (tree: Tree) {
   // Update dependencies in root pyproject.toml
   const rootTomlConfig = parse(tree.read('pyproject.toml').toString()) as PyProjectToml;
 
-  console.log(chalk`{bold Adding dependencies from libs}`);
+  console.log(chalk.bold('Adding dependencies from libs...'));
   tree.children('libs').forEach((lib) => {
     const projectTomlPath = path.join('libs', lib, 'pyproject.toml');
 
     if (existsSync(projectTomlPath)) {
+      console.log(chalk.bold(`Resolving dependencies for lib ${lib}...`));
       const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
-
       addSharedDependencies(rootTomlConfig, projectTomlConfig);
 
       if (rootTomlConfig.tool.poetry.dependencies[projectTomlConfig.tool.poetry.name] === undefined) {
@@ -36,11 +37,12 @@ export default async function (tree: Tree) {
     }
   });
 
-  console.log(chalk`{bold Adding dependencies from services}`);
+  console.log(chalk.bold('Adding dependencies from services...'));
   tree.children('services').forEach((service) => {
     const projectTomlPath = path.join('services', service, 'pyproject.toml');
 
     if (existsSync(projectTomlPath)) {
+      console.log(chalk.bold(`Resolving dependencies for service ${service}...`));
       const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
       addSharedDependencies(rootTomlConfig, projectTomlConfig);
     }
