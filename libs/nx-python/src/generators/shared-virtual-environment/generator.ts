@@ -1,4 +1,4 @@
-import type { PyProjectToml } from '../../utils/poetry';
+import { runPoetry, type PyProjectToml } from '../../utils/poetry';
 import type { Tree } from '@nx/devkit';
 
 import { formatFiles, generateFiles, installPackagesTask } from '@nx/devkit';
@@ -9,6 +9,7 @@ import chalk from 'chalk';
 import { get, isObject, set } from 'lodash';
 
 export default async function (tree: Tree) {
+  process.chdir(tree.root);
   console.log(chalk.blue.bold(`\n🚀 Migrating to a shared virtual environment\n`));
   const config = JSON.parse(tree.read('package.json').toString());
 
@@ -53,6 +54,7 @@ export default async function (tree: Tree) {
   await formatFiles(tree);
   return () => {
     installPackagesTask(tree);
+    runPoetry(['install']);
   };
 }
 
