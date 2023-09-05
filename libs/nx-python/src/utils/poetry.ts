@@ -67,7 +67,7 @@ export async function checkPoetryExecutable(): Promise<void> {
  */
 export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void {
   const commandStr = `${POETRY_EXECUTABLE} ${args.join(' ')}`;
-  console.log(chalk.dim(`\n${chalk.bgGray(' POETRY ')} Running ${commandStr}`));
+  console.log(chalk.dim(`\n${chalk.bgGray(' POETRY ')} Running ${commandStr}\n`));
 
   const result = spawn.sync(POETRY_EXECUTABLE, args, {
     ...options,
@@ -88,7 +88,7 @@ export function updateSharedEnvironment(context: ExecutorContext): void {
   const rootTomlPath = path.join(context.root, 'pyproject.toml');
 
   if (existsSync(rootTomlPath)) {
-    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} Updating shared virtual environment`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} Updating shared virtual environment\n`));
     const rootTomlConfig = toml.parse(fs.readFileSync(rootTomlPath, 'utf-8')) as PyProjectToml;
 
     // Reset dependencies so unused dependencies are removed
@@ -97,6 +97,7 @@ export function updateSharedEnvironment(context: ExecutorContext): void {
       set(rootTomlConfig, 'tool.poetry.group.dev.dependencies', {});
 
     Object.keys(context.projectsConfigurations.projects).forEach((project) => {
+      console.log(chalk.dim(`Checking ${project} for changes`));
       const projectTomlPath = path.join(context.projectsConfigurations.projects[project].root, 'pyproject.toml');
 
       if (!existsSync(projectTomlPath)) return;

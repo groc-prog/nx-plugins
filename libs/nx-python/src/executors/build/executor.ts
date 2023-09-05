@@ -21,6 +21,7 @@ export default async function executor(options: BuildExecutorSchema, context: Ex
     const { root } = context.workspace.projects[context.projectName];
     const tmpBuildFolderPath = path.join(tmpdir(), 'nx-python', 'build', uuidv4());
     const buildFolderPath = path.join(root, options.outputPath);
+    const rootPath = path.resolve(root);
 
     // Map ignore paths to absolute paths
     options.ignorePaths = [...IGNORED_PATHS, ...options.ignorePaths];
@@ -28,15 +29,15 @@ export default async function executor(options: BuildExecutorSchema, context: Ex
 
     console.log(chalk.dim(`Creating temporary directory ${tmpBuildFolderPath}`));
     mkdirSync(tmpBuildFolderPath, { recursive: true });
-    copySync(root, tmpBuildFolderPath, { filter: (file) => !options.ignorePaths.includes(file) });
+    copySync(rootPath, tmpBuildFolderPath, { filter: (file) => !options.ignorePaths.includes(file) });
 
     const buildPyProjectToml = path.join(tmpBuildFolderPath, 'pyproject.toml');
     const buildTomlData = parse(readFileSync(buildPyProjectToml).toString('utf-8')) as PyProjectToml;
 
-    resolveDependencies(buildTomlData, root, tmpBuildFolderPath, root);
+    resolveDependencies(buildTomlData, rootPath, tmpBuildFolderPath, rootPath);
     writeFileSync(buildPyProjectToml, stringify(buildTomlData));
 
-    console.log(chalk.dim('Building artifacts...'));
+    console.log(chalk.dim('\nBuilding artifacts...'));
     runPoetry(['build'], { cwd: tmpBuildFolderPath, env: process.env });
 
     ensureDirSync(buildFolderPath);
@@ -67,7 +68,7 @@ function resolveDependencies(
   buildFolderPath: string,
   projectPath: string
 ): void {
-  console.log(chalk.dim(`Resolving dependencies for ${dependencyProjectPath}`));
+  console.log(chalk.dim(`\nResolving dependencies for ${dependencyProjectPath}`));
   const dependencyPyProjectToml = path.join(dependencyProjectPath, 'pyproject.toml');
   const dependencyTomlData = parse(readFileSync(dependencyPyProjectToml).toString('utf-8')) as PyProjectToml;
 
@@ -112,5 +113,5 @@ function copyDependencyProject(
 
   console.log(chalk.dim(`Copying dependency ${dependencyName} to build directory`));
   copySync(dependencyProjectPath, buildFolderPath, { filter: (file) => !ignorePaths.includes(file) });
-  pyProjectTomlData.tool.poetry.packages.push({ include: dependencyName });
+  pyProjectTomlData.tool.poetry.packages.push({ include: dependencyName.replace('-', '_') });
 }

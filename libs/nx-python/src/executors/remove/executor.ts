@@ -35,7 +35,6 @@ export default async function executor(options: RemoveExecutorSchema, context: E
 
     console.log(chalk.dim(`Removing dependencies ${options.dependencies.join(', ')}`));
     runPoetry(removeArgs, execOpts);
-    runPoetry(['lock'], execOpts);
 
     updateSharedEnvironment(context);
 

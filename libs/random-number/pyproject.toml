@@ -1,0 +1,25 @@
+[tool.poetry]
+name = "random-number"
+version = "0.0.0"
+description = "some random number"
+authors = []
+readme = 'README.md'
+packages = [{ include = "random_number" }]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^2.17.5"
+black = "^23.7.0"
+pytest = "^7.4.0"
+pyright = "^1.1.325"
+
+[tool.black]
+line-length = 120
+target-version = ["py310"]
+workers = 4
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

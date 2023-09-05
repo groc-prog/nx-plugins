@@ -29,7 +29,8 @@ export default async function executor(options: AddExecutorSchema, context: Exec
       addLocalProject(context, options.dependencies);
 
       // Lock dependencies
-      runPoetry(['update', '--lock'], execOpts);
+      runPoetry(['lock'], execOpts);
+      runPoetry(['install', '--sync'], execOpts);
     } else {
       const addArgs = ['add'];
       const additionalArgs = omit(options, ['dependencies', 'local']);
