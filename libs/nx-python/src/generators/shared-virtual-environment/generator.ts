@@ -10,7 +10,7 @@ import chalk from 'chalk';
 
 export default async function (tree: Tree) {
   process.chdir(tree.root);
-  console.log(chalk.blue.bold(`\n🚀 Migrating to a shared virtual environment\n`));
+  console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🚀 Migrating to a shared virtual environment\n`));
   const config = JSON.parse(tree.read('package.json').toString());
 
   generateFiles(tree, path.join(__dirname, 'files'), '.', {
@@ -20,12 +20,12 @@ export default async function (tree: Tree) {
   // Update dependencies in root pyproject.toml
   const rootTomlConfig = parse(tree.read('pyproject.toml').toString()) as PyProjectToml;
 
-  console.log(chalk.bold('\nAdding dependencies from libs...'));
+  console.log(chalk.dim('\nAdding dependencies from libs'));
   tree.children('libs').forEach((lib) => {
     const projectTomlPath = path.join('libs', lib, 'pyproject.toml');
 
     if (existsSync(projectTomlPath)) {
-      console.log(chalk.bold(`Resolving dependencies for lib ${lib}...`));
+      console.log(chalk.dim(`Resolving dependencies for lib ${lib}`));
       const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
       addSharedDependencies(rootTomlConfig, projectTomlConfig);
 
@@ -38,12 +38,12 @@ export default async function (tree: Tree) {
     }
   });
 
-  console.log(chalk.bold('\nAdding dependencies from services...'));
+  console.log(chalk.dim('\nAdding dependencies from services'));
   tree.children('services').forEach((service) => {
     const projectTomlPath = path.join('services', service, 'pyproject.toml');
 
     if (existsSync(projectTomlPath)) {
-      console.log(chalk.bold(`Resolving dependencies for service ${service}...`));
+      console.log(chalk.dim(`Resolving dependencies for service ${service}`));
       const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
       addSharedDependencies(rootTomlConfig, projectTomlConfig);
     }
@@ -55,5 +55,8 @@ export default async function (tree: Tree) {
   return () => {
     installPackagesTask(tree);
     runPoetry(['install']);
+    console.log(
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully migrated to a shared virtual environment`)
+    );
   };
 }

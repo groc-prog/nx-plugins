@@ -2,7 +2,7 @@ import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
 import type { InstallExecutorSchema } from './schema';
 
-import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
+import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
 import chalk from 'chalk';
 
 export default async function executor(options: InstallExecutorSchema, context: ExecutorContext) {
@@ -11,7 +11,7 @@ export default async function executor(options: InstallExecutorSchema, context: 
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue.bold(`\n🚀 Installing dependencies for ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')}🚀 Installing dependencies for ${context.projectName}\n`));
 
     // Add any additional arguments to the command
     const installArgs = ['install'];
@@ -22,14 +22,20 @@ export default async function executor(options: InstallExecutorSchema, context: 
       env: process.env,
     };
 
-    console.log(chalk.bold('Installing dependencies ...'));
+    console.log(chalk.dim('Installing dependencies ...'));
     runPoetry(installArgs, execOpts);
 
-    console.log(chalk.green.bold(`\n🎉 Successfully installed dependencies for ${context.projectName}!`));
+    updateSharedEnvironment(context);
+
+    console.log(
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully installed dependencies for ${context.projectName}!`)
+    );
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n❌ Failed to install dependencies for ${context.projectName}!`));
-    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
+    console.error(
+      chalk.red(`\n${chalk.bgRed(' ERROR ')}❌ Failed to install dependencies for ${context.projectName}!`)
+    );
+    console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }
 }

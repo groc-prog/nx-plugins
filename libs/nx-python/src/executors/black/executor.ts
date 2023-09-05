@@ -11,7 +11,7 @@ export default async function executor(options: BlackExecutorSchema, context: Ex
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue.bold(`\n🧹 Formatting ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🧹 Formatting ${context.projectName}\n`));
 
     const execOpts: SpawnSyncOptions = {
       cwd: projectContext.root,
@@ -19,11 +19,11 @@ export default async function executor(options: BlackExecutorSchema, context: Ex
     };
     runPoetry(['run', 'black', '.'], execOpts);
 
-    console.log(chalk.green(`\n🎉 Successfully formatted ${context.projectName}`));
+    console.log(chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully formatted ${context.projectName}`));
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n❌ Failed to format ${context.projectName}`));
-    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
+    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to format ${context.projectName}`));
+    console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }
 }

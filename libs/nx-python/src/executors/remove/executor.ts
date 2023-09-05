@@ -15,7 +15,7 @@ export default async function executor(options: RemoveExecutorSchema, context: E
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue(`\n🧹 Removing dependencies from ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🧹 Removing dependencies from ${context.projectName}\n`));
 
     const removeArgs = ['remove'];
     const additionalArgs = omit(options, ['dependencies', 'local']);
@@ -33,17 +33,21 @@ export default async function executor(options: RemoveExecutorSchema, context: E
 
     if (options.local) checkLocalDependencyRemovable(context);
 
-    console.log(chalk.bold(`Removing dependencies ${options.dependencies.join(', ')}...`));
+    console.log(chalk.dim(`Removing dependencies ${options.dependencies.join(', ')}`));
     runPoetry(removeArgs, execOpts);
     runPoetry(['lock'], execOpts);
 
     updateSharedEnvironment(context);
 
-    console.log(chalk.green(`\n🎉 Successfully removed dependencies from ${context.projectName}!`));
+    console.log(
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully removed dependencies from ${context.projectName}!`)
+    );
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n❌ Failed to remove dependencies from ${context.projectName}!`));
-    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
+    console.error(
+      chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to remove dependencies from ${context.projectName}!`)
+    );
+    console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }
 }
@@ -56,7 +60,7 @@ export default async function executor(options: RemoveExecutorSchema, context: E
  * @returns {void}
  */
 function checkLocalDependencyRemovable(context: ExecutorContext): void {
-  console.log(chalk.bold('Checking if local dependencies can be removed...'));
+  console.log(chalk.dim('Checking if local dependencies can be removed'));
   const foundDependencies: Record<string, number> = {};
   const projectTomlConfig = path.join(
     context.projectsConfigurations.projects[context.projectName].root,

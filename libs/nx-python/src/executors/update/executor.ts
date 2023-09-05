@@ -12,7 +12,7 @@ export default async function executor(options: UpdateExecutorSchema, context: E
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue.bold(`\n🚀 Updating dependencies for ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🚀 Updating dependencies for ${context.projectName}\n`));
 
     const updateArgs = ['update'];
     const additionalArgs = omit(options, ['dependencies']);
@@ -28,16 +28,18 @@ export default async function executor(options: UpdateExecutorSchema, context: E
       env: process.env,
     };
 
-    console.log(chalk.bold(`Updating dependencies ${options.dependencies.join(', ')}...`));
+    console.log(chalk.dim(`Updating dependencies ${options.dependencies.join(', ')}`));
     runPoetry(updateArgs, execOpts);
 
     updateSharedEnvironment(context);
 
-    console.log(chalk.green(`\n🎉 Successfully updated dependencies in ${context.projectName}`));
+    console.log(
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully updated dependencies in ${context.projectName}`)
+    );
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n❌ Failed to update dependencies in ${context.projectName}`));
-    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
+    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to update dependencies in ${context.projectName}`));
+    console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }
 }

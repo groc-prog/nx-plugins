@@ -16,7 +16,7 @@ export default async function executor(options: AddExecutorSchema, context: Exec
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue.bold(`\n📦 Installing dependencies for ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 📦 Installing dependencies for ${context.projectName}\n`));
 
     const execOpts: SpawnSyncOptions = {
       cwd: projectContext.root,
@@ -25,7 +25,7 @@ export default async function executor(options: AddExecutorSchema, context: Exec
 
     if (options.local) {
       // Install dependencies locally
-      console.log(chalk.bold(`Adding local dependencies ${options.dependencies.join(', ')}...`));
+      console.log(chalk.dim(`Adding local dependencies ${options.dependencies.join(', ')}`));
       addLocalProject(context, options.dependencies);
 
       // Lock dependencies
@@ -40,17 +40,19 @@ export default async function executor(options: AddExecutorSchema, context: Exec
         ...Object.entries(additionalArgs).map(([key, value]) => `--${key}=${value}`)
       );
 
-      console.log(chalk.bold(`Adding dependencies ${options.dependencies.join(', ')}...`));
+      console.log(chalk.dim(`Adding dependencies ${options.dependencies.join(', ')}`));
       runPoetry(addArgs, execOpts);
     }
 
     updateSharedEnvironment(context);
 
-    console.log(chalk.green(`\n🎉 Successfully added dependencies to ${context.projectName}`));
+    console.log(
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully added dependencies to ${context.projectName}`)
+    );
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n❌ Failed to add dependencies to ${context.projectName}`));
-    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
+    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to add dependencies to ${context.projectName}`));
+    console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }
 }
@@ -78,7 +80,7 @@ function addLocalProject(context: ExecutorContext, dependencies: string[]): void
     if (context.projectsConfigurations.projects[dependency].projectType !== 'library')
       throw new Error(`Local dependencies must be libraries.`);
 
-    console.log(chalk.bold(`Adding local project ${context.projectsConfigurations.projects[dependency].root}`));
+    console.log(chalk.dim(`Adding local project ${context.projectsConfigurations.projects[dependency].root}`));
     projectTomlData.tool.poetry.dependencies[dependency] = {
       path: path.relative(projectPath.root, context.projectsConfigurations.projects[dependency].root),
       develop: true,

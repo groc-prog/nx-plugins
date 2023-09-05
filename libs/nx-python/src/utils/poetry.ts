@@ -67,7 +67,7 @@ export async function checkPoetryExecutable(): Promise<void> {
  */
 export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void {
   const commandStr = `${POETRY_EXECUTABLE} ${args.join(' ')}`;
-  console.log(chalk.bold(`\nRunning ${commandStr}\n`));
+  console.log(chalk.dim(`\n${chalk.bgGray('POETRY')} Running ${commandStr}`));
 
   const result = spawn.sync(POETRY_EXECUTABLE, args, {
     ...options,
@@ -88,7 +88,7 @@ export function updateSharedEnvironment(context: ExecutorContext): void {
   const rootTomlPath = path.join(context.root, 'pyproject.toml');
 
   if (existsSync(rootTomlPath)) {
-    console.log(chalk.blue.bold('\nUpdating shared virtual environment...\n'));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} Updating shared virtual environment`));
     const rootTomlConfig = toml.parse(fs.readFileSync(rootTomlPath, 'utf-8')) as PyProjectToml;
 
     // Reset dependencies so unused dependencies are removed
@@ -110,8 +110,12 @@ export function updateSharedEnvironment(context: ExecutorContext): void {
       cwd: context.root,
       env: process.env,
     });
+    runPoetry(['install', '--sync'], {
+      cwd: context.root,
+      env: process.env,
+    });
 
-    console.log(chalk.green.bold('\nShared virtual environment updated successfully!\n'));
+    console.log(chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} Shared virtual environment updated successfully!`));
   }
 }
 
@@ -128,8 +132,15 @@ export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectToml
     const rootDependency = rootTomlConfig.tool.poetry.dependencies[dependencyName];
     const projectDependency = projectTomlConfig.tool.poetry.dependencies[dependencyName];
 
-    // Skip local dependencies, added later on
-    if (isObject(projectDependency) || isObject(rootDependency)) return;
+    if (isObject(projectDependency)) {
+      if (rootDependency === undefined)
+        rootTomlConfig.tool.poetry.dependencies[dependencyName] = {
+          develop: true,
+          path: projectDependency.path.replace(/^(\.\.\/)*/, ''),
+        };
+
+      return;
+    }
 
     if (rootDependency && projectDependency && rootDependency !== projectDependency)
       throw new Error(
@@ -149,8 +160,15 @@ export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectToml
       const rootDependency = rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
       const projectDependency = projectTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
 
-      // Skip local dependencies, added later on
-      if (isObject(projectDependency) || isObject(rootDependency)) return;
+      if (isObject(projectDependency)) {
+        if (rootDependency === undefined)
+          rootTomlConfig.tool.poetry.dependencies[dependencyName] = {
+            develop: true,
+            path: projectDependency.path.replace(/^(\.\.\/)*/, ''),
+          };
+
+        return;
+      }
 
       if (rootDependency && projectDependency && rootDependency !== projectDependency)
         throw new Error(
@@ -158,8 +176,7 @@ export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectToml
           and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
         );
 
-      if (rootDependency === undefined)
-        rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName] = projectDependency;
+      if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;
     });
   }
 }

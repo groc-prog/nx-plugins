@@ -17,7 +17,7 @@ export default async function executor(options: BuildExecutorSchema, context: Ex
   try {
     await checkPoetryExecutable();
 
-    console.log(chalk.blue.bold(`\n🛠️ Building ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🛠️ Building ${context.projectName}\n`));
     const { root } = context.workspace.projects[context.projectName];
     const tmpBuildFolderPath = path.join(tmpdir(), 'nx-python', 'build', uuidv4());
     const buildFolderPath = path.join(root, options.outputPath);
@@ -26,7 +26,7 @@ export default async function executor(options: BuildExecutorSchema, context: Ex
     options.ignorePaths = [...IGNORED_PATHS, ...options.ignorePaths];
     options.ignorePaths = options.ignorePaths.map((ignorePath) => path.join(root, ignorePath));
 
-    console.log(chalk.bold(`Creating temporary directory ${tmpBuildFolderPath}`));
+    console.log(chalk.dim(`Creating temporary directory ${tmpBuildFolderPath}`));
     mkdirSync(tmpBuildFolderPath, { recursive: true });
     copySync(root, tmpBuildFolderPath, { filter: (file) => !options.ignorePaths.includes(file) });
 
@@ -36,18 +36,18 @@ export default async function executor(options: BuildExecutorSchema, context: Ex
     resolveDependencies(buildTomlData, root, tmpBuildFolderPath, root);
     writeFileSync(buildPyProjectToml, stringify(buildTomlData));
 
-    console.log(chalk.bold('Building artifacts...'));
+    console.log(chalk.dim('Building artifacts...'));
     runPoetry(['build'], { cwd: tmpBuildFolderPath, env: process.env });
 
     ensureDirSync(buildFolderPath);
     copySync(path.join(tmpBuildFolderPath, 'dist'), buildFolderPath, { overwrite: true });
     removeSync(tmpBuildFolderPath);
 
-    console.log(chalk.green(`\n🎉 Successfully built ${context.projectName}!`));
+    console.log(chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully built ${context.projectName}!`));
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n❌ Failed to build ${context.projectName}!`));
-    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
+    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to build ${context.projectName}!`));
+    console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }
 }
@@ -67,7 +67,7 @@ function resolveDependencies(
   buildFolderPath: string,
   projectPath: string
 ): void {
-  console.log(chalk.bold(`Resolving dependencies for ${chalk.bgBlue(dependencyProjectPath)}...`));
+  console.log(chalk.dim(`Resolving dependencies for ${dependencyProjectPath}`));
   const dependencyPyProjectToml = path.join(dependencyProjectPath, 'pyproject.toml');
   const dependencyTomlData = parse(readFileSync(dependencyPyProjectToml).toString('utf-8')) as PyProjectToml;
 
@@ -110,7 +110,7 @@ function copyDependencyProject(
 ): void {
   const ignorePaths = IGNORED_PATHS.map((ignorePath) => path.join(dependencyProjectPath, ignorePath));
 
-  console.log(chalk.bold(`Copying dependency ${chalk.bgBlue(dependencyName)} to build directory...`));
+  console.log(chalk.dim(`Copying dependency ${dependencyName} to build directory`));
   copySync(dependencyProjectPath, buildFolderPath, { filter: (file) => !ignorePaths.includes(file) });
   pyProjectTomlData.tool.poetry.packages.push({ include: dependencyName });
 }

@@ -29,12 +29,22 @@
     "black": {
       "implementation": "./src/executors/black/executor",
       "schema": "./src/executors/black/schema.json",
-      "description": "black executor"
+      "description": "Wrapper for black formatter."
     },
     "pylint": {
       "implementation": "./src/executors/pylint/executor",
       "schema": "./src/executors/pylint/schema.json",
-      "description": "pylint executor"
+      "description": "Wrapper for pylint linter."
+    },
+    "lock": {
+      "implementation": "./src/executors/lock/executor",
+      "schema": "./src/executors/lock/schema.json",
+      "description": "Wrapper for Poetry's lock command."
+    },
+    "pyright": {
+      "implementation": "./src/executors/pyright/executor",
+      "schema": "./src/executors/pyright/schema.json",
+      "description": "Wrapper for pyright type checker."
     }
   }
 }

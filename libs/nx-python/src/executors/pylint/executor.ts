@@ -11,19 +11,21 @@ export default async function executor(options: PylintExecutorSchema, context: E
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue.bold(`\n🧹 Linting ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')}🧹 Linting ${context.projectName}\n`));
+
+    const moduleName = context.projectName.replace('-', '_');
 
     const execOpts: SpawnSyncOptions = {
       cwd: projectContext.root,
       env: process.env,
     };
-    runPoetry(['run', 'pylint', '--rcfile=.pylintrc', context.projectName, 'tests'], execOpts);
+    runPoetry(['run', 'pylint', moduleName, 'tests'], execOpts);
 
-    console.log(chalk.green(`\n🎉 Successfully linted ${context.projectName}`));
+    console.log(chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully linted ${context.projectName}`));
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n❌ Failed to lint ${context.projectName}`));
-    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
+    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')}❌ Failed to lint ${context.projectName}`));
+    console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }
 }

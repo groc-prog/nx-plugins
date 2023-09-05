@@ -11,7 +11,7 @@ export default async function executor(options: PyRightExecutorSchema, context: 
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue.bold(`\n🔍 Type-checking ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🔍 Type-checking ${context.projectName}\n`));
 
     const execOpts: SpawnSyncOptions = {
       cwd: projectContext.root,
@@ -19,11 +19,11 @@ export default async function executor(options: PyRightExecutorSchema, context: 
     };
     runPoetry(['run', 'pyright'], execOpts);
 
-    console.log(chalk.green(`\n🎉 Successfully type-checked ${context.projectName}`));
+    console.log(chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully type-checked ${context.projectName}`));
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n❌ Failed to type-check ${context.projectName}`));
-    console.error(`\n${chalk.bgRed('ERROR')} ${error.message}`);
+    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to type-check ${context.projectName}`));
+    console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }
 }
