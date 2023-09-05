@@ -12,6 +12,11 @@
       "factory": "./src/generators/poetry-project/generator",
       "schema": "./src/generators/poetry-project/schema.json",
       "description": "Create a new Python project using Poetry."
+    },
+    "fastapi-project": {
+      "factory": "./src/generators/fastapi-project/generator",
+      "schema": "./src/generators/fastapi-project/schema.json",
+      "description": "fastapi-project generator"
     }
   }
 }

@@ -11,7 +11,7 @@ import {
   workspaceLayout,
 } from '@nx/devkit';
 
-export default async function (tree: Tree, schema: PoetryProjectGeneratorSchema) {
+export default async function generator(tree: Tree, schema: PoetryProjectGeneratorSchema) {
   const projectName = names(schema.name).fileName;
   const target =
     schema.type === 'application'

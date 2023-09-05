@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "FastAPIProject",
+  "title": "Generate a new FastAPI project using Poetry.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use?"
+    },
+    "description": {
+      "type": "string",
+      "description": "Project description.",
+      "default": ""
+    },
+    "port": {
+      "type": "number",
+      "description": "Port the application runs on.",
+      "default": 8000
+    }
+  },
+  "required": ["name"]
+}
