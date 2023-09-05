@@ -67,7 +67,7 @@ export async function checkPoetryExecutable(): Promise<void> {
  */
 export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void {
   const commandStr = `${POETRY_EXECUTABLE} ${args.join(' ')}`;
-  console.log(chalk.dim(`\n${chalk.bgGray('POETRY')} Running ${commandStr}`));
+  console.log(chalk.dim(`\n${chalk.bgGray(' POETRY ')} Running ${commandStr}`));
 
   const result = spawn.sync(POETRY_EXECUTABLE, args, {
     ...options,
