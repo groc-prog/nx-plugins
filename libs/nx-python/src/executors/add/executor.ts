@@ -15,7 +15,7 @@ export default async function executor(options: AddExecutorSchema, context: Exec
 
   try {
     await checkPoetryExecutable();
-    const projectContext = context.workspace.projects[context.projectName];
+    const projectContext = context.projectsConfigurations.projects[context.projectName];
     console.log(chalk.blue.bold(`\n📦 Installing dependencies for ${context.projectName}\n`));
 
     const execOpts: SpawnSyncOptions = {
@@ -65,23 +65,27 @@ export default async function executor(options: AddExecutorSchema, context: Exec
  */
 function addLocalProject(context: ExecutorContext, dependencies: string[]): void {
   // Get current pyproject.toml file path
-  const projectPath = context.workspace.projects[context.projectName];
+  const projectPath = context.projectsConfigurations.projects[context.projectName];
   const projectTomlConfig = path.join(projectPath.root, 'pyproject.toml');
 
   const projectTomlData = toml.parse(fs.readFileSync(projectTomlConfig, 'utf-8')) as PyProjectToml;
 
   // Add dependencies to pyproject.toml
   dependencies.forEach((dependency) => {
-    if (!context.workspace.projects[dependency]) throw new Error(`Project ${dependency} not found in Nx workspace.`);
+    if (!context.projectsConfigurations.projects[dependency])
+      throw new Error(`Project ${dependency} not found in Nx workspace.`);
 
-    console.log(chalk.bold(`Adding local project ${context.workspace.projects[dependency].root}`));
+    if (context.projectsConfigurations.projects[dependency].projectType !== 'library')
+      throw new Error(`Local dependencies must be libraries.`);
+
+    console.log(chalk.bold(`Adding local project ${context.projectsConfigurations.projects[dependency].root}`));
     projectTomlData.tool.poetry.dependencies[dependency] = {
-      path: path.relative(projectPath.root, context.workspace.projects[dependency].root),
+      path: path.relative(projectPath.root, context.projectsConfigurations.projects[dependency].root),
       develop: true,
     };
 
     // Add any local dependencies defined in dependency's pyproject.toml
-    const dependencyTomlConfig = path.join(context.workspace.projects[dependency].root, 'pyproject.toml');
+    const dependencyTomlConfig = path.join(context.projectsConfigurations.projects[dependency].root, 'pyproject.toml');
 
     if (!fs.existsSync(dependencyTomlConfig)) throw new Error(`Project ${dependency} not found in Nx workspace.`);
 

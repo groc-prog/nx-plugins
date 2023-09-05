@@ -10,17 +10,22 @@ import path from 'path';
 import fs from 'fs';
 import { existsSync } from 'fs-extra';
 
-export type PyProjectTomlDependency =
-  | string
-  | {
-      path?: string;
-      develop?: boolean;
-    };
+/**
+ * PyProject.toml dependency. Can be a string or an object with path and develop properties if
+ * it is a lib.
+ */
+export type PyProjectTomlDependency = string | { path?: string; develop?: boolean };
 
+/**
+ * PyProject.toml dependencies.
+ */
 export type PyProjectTomlDependencies = {
   [key: string]: PyProjectTomlDependency;
 };
 
+/**
+ * PyProject.toml file format.
+ */
 export type PyProjectToml = {
   tool?: {
     poetry?: {
@@ -91,8 +96,8 @@ export function updateSharedEnvironment(context: ExecutorContext): void {
     if (get(rootTomlConfig, 'tool.poetry.group.dev.dependencies', null) !== null)
       set(rootTomlConfig, 'tool.poetry.group.dev.dependencies', {});
 
-    Object.keys(context.workspace.projects).forEach((project) => {
-      const projectTomlPath = path.join(context.workspace.projects[project].root, 'pyproject.toml');
+    Object.keys(context.projectsConfigurations.projects).forEach((project) => {
+      const projectTomlPath = path.join(context.projectsConfigurations.projects[project].root, 'pyproject.toml');
 
       if (!existsSync(projectTomlPath)) return;
 

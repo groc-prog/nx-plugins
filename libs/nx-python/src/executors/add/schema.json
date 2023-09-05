@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "title": "Add executor",
-  "description": "",
+  "title": "Add dependencies to a project or library",
+  "description": "Runs `poetry add <dependencies> <args>` in the current project or library. You can either install dependencies from PyPI or from local libraries (in which case you need to set the `--local` argument to `true`).",
   "type": "object",
   "properties": {
     "dependencies": {
@@ -13,7 +13,7 @@
     },
     "local": {
       "type": "boolean",
-      "description": "Whether the dependencies are local libs or not.",
+      "description": "Whether the dependencies are local libraries or not.",
       "default": false
     }
   },

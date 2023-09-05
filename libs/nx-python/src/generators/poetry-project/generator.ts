@@ -41,6 +41,10 @@ export default async function (tree: Tree, schema: PoetryProjectGeneratorSchema)
         executor: '@nx-python-poetry/nx-python:update',
         options: {},
       },
+      lock: {
+        executor: '@nx-python-poetry/nx-python:lock',
+        options: {},
+      },
       build: {
         executor: '@nx-python-poetry/nx-python:build',
         options: {
@@ -54,6 +58,10 @@ export default async function (tree: Tree, schema: PoetryProjectGeneratorSchema)
       },
       pylint: {
         executor: '@nx-python-poetry/nx-python:pylint',
+        options: {},
+      },
+      pyright: {
+        executor: '@nx-python-poetry/nx-python:pyright',
         options: {},
       },
     },

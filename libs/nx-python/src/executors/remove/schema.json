@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "title": "Remove executor",
-  "description": "",
+  "title": "Remove dependencies from the project.",
+  "description": "Runs `poetry add <dependencies> <args>` in the current project or library. When removing local dependencies, the `--local` has to be set to `true`.",
   "type": "object",
   "properties": {
     "dependencies": {
@@ -13,7 +13,7 @@
     },
     "local": {
       "type": "boolean",
-      "description": "Whether the dependencies are local libs or not.",
+      "description": "Whether the dependencies are local libraries or not.",
       "default": false
     }
   },

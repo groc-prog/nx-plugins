@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "title": "Build executor",
-  "description": "",
+  "title": "Builds the current project and all if it's local dependencies.",
+  "description": "Builds the current project and all if it's local dependencies into a single wheel or source distribution.",
   "type": "object",
   "properties": {
     "outputPath": {
@@ -18,5 +18,5 @@
       }
     }
   },
-  "required": ["outputPath"]
+  "required": []
 }

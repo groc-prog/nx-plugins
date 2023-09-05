@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "title": "Update executor",
-  "description": "",
+  "title": "Updates dependencies in a project.",
+  "description": "Runs `poetry update <dependencies> <args>` in the current project or library.",
   "type": "object",
   "properties": {
     "dependencies": {

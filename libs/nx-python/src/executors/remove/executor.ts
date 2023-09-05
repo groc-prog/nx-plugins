@@ -14,7 +14,7 @@ export default async function executor(options: RemoveExecutorSchema, context: E
 
   try {
     await checkPoetryExecutable();
-    const projectContext = context.workspace.projects[context.projectName];
+    const projectContext = context.projectsConfigurations.projects[context.projectName];
     console.log(chalk.blue(`\n🧹 Removing dependencies from ${context.projectName}\n`));
 
     const removeArgs = ['remove'];
@@ -58,7 +58,10 @@ export default async function executor(options: RemoveExecutorSchema, context: E
 function checkLocalDependencyRemovable(context: ExecutorContext): void {
   console.log(chalk.bold('Checking if local dependencies can be removed...'));
   const foundDependencies: Record<string, number> = {};
-  const projectTomlConfig = path.join(context.workspace.projects[context.projectName].root, 'pyproject.toml');
+  const projectTomlConfig = path.join(
+    context.projectsConfigurations.projects[context.projectName].root,
+    'pyproject.toml'
+  );
   const projectTomlData = parse(fs.readFileSync(projectTomlConfig).toString()) as PyProjectToml;
 
   // Filter out local dependencies
@@ -68,7 +71,7 @@ function checkLocalDependencyRemovable(context: ExecutorContext): void {
 
   // Check if local dependencies are used by other projects or if they can be removed
   localDependencies.forEach((dependency) => {
-    const dependencyTomlConfig = path.join(context.workspace.projects[dependency].root, 'pyproject.toml');
+    const dependencyTomlConfig = path.join(context.projectsConfigurations.projects[dependency].root, 'pyproject.toml');
     const dependencyTomlData = parse(fs.readFileSync(dependencyTomlConfig).toString()) as PyProjectToml;
 
     Object.keys(dependencyTomlData.tool.poetry.dependencies).forEach((dependencyName: string) => {

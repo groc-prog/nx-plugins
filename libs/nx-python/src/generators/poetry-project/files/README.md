@@ -4,5 +4,5 @@
 ## ⚡️ Next steps
 
 - [ ] Write some code
-- [ ] Add unit tests
+- [ ] Add tests
 - [ ] Update this documentation

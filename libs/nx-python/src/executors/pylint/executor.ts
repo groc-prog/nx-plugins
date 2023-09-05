@@ -10,14 +10,14 @@ export default async function executor(options: PylintExecutorSchema, context: E
 
   try {
     await checkPoetryExecutable();
-    const projectContext = context.workspace.projects[context.projectName];
+    const projectContext = context.projectsConfigurations.projects[context.projectName];
     console.log(chalk.blue.bold(`\n🧹 Linting ${context.projectName}\n`));
 
     const execOpts: SpawnSyncOptions = {
       cwd: projectContext.root,
       env: process.env,
     };
-    runPoetry(['run', 'pylint', context.projectName, 'tests'], execOpts);
+    runPoetry(['run', 'pylint', '--rcfile=.pylintrc', context.projectName, 'tests'], execOpts);
 
     console.log(chalk.green(`\n🎉 Successfully linted ${context.projectName}`));
     return { success: true };
