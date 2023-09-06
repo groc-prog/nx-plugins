@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "app-a"
+version = "0.0.0"
+description = ""
+authors = [ ]
+readme = "README.md"
+
+  [[tool.poetry.packages]]
+  include = "app_a"
+
+  [tool.poetry.dependencies]
+  python = "^3.10"
+  fastapi = "^0.103.1"
+  uvicorn = "^0.23.2"
+
+    [tool.poetry.dependencies.lib-a]
+    path = "../../libs/lib-a"
+    develop = true
+
+[tool.poetry.group.dev.dependencies]
+pylint = "^2.17.5"
+black = "^23.7.0"
+pytest = "^7.4.0"
+pyright = "^1.1.325"
+
+[tool.black]
+line-length = 120
+target-version = [ "py310" ]
+workers = 4
+
+[build-system]
+requires = [ "poetry-core" ]
+build-backend = "poetry.core.masonry.api"

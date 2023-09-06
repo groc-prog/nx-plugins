@@ -14,11 +14,7 @@
       "inputs": ["production", "^production"]
     },
     "lint": {
-      "inputs": [
-        "default",
-        "{workspaceRoot}/.eslintrc.json",
-        "{workspaceRoot}/.eslintignore"
-      ]
+      "inputs": ["default", "{workspaceRoot}/.eslintrc.json", "{workspaceRoot}/.eslintignore"]
     },
     "test": {
       "inputs": ["default", "^production", "{workspaceRoot}/jest.preset.js"]
@@ -38,6 +34,8 @@
     "sharedGlobals": []
   },
   "workspaceLayout": {
-    "appsDir": "services"
-  }
+    "appsDir": "services",
+    "libsDir": "libs"
+  },
+  "plugins": ["./libs/nx-python/src/graph/dependency-graph.ts"]
 }

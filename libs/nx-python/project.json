@@ -1,35 +1,35 @@
 {
   "name": "nx-python",
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "packages/nx-python/src",
+  "sourceRoot": "libs/nx-python/src",
   "type": "library",
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
       "outputs": ["{options.outputPath}"],
       "options": {
-        "outputPath": "dist/packages/nx-python",
-        "main": "packages/nx-python/src/index.ts",
-        "tsConfig": "packages/nx-python/tsconfig.lib.json",
+        "outputPath": "dist/libs/nx-python",
+        "main": "libs/nx-python/src/index.ts",
+        "tsConfig": "libs/nx-python/tsconfig.lib.json",
         "assets": [
-          "packages/nx-python/*.md",
+          "libs/nx-python/*.md",
           {
-            "input": "./packages/nx-python/src",
+            "input": "./libs/nx-python/src",
             "glob": "**/!(*.ts)",
             "output": "./src"
           },
           {
-            "input": "./packages/nx-python/src",
+            "input": "./libs/nx-python/src",
             "glob": "**/*.d.ts",
             "output": "./src"
           },
           {
-            "input": "./packages/nx-python",
+            "input": "./libs/nx-python",
             "glob": "generators.json",
             "output": "."
           },
           {
-            "input": "./packages/nx-python",
+            "input": "./libs/nx-python",
             "glob": "executors.json",
             "output": "."
           }
@@ -41,11 +41,11 @@
       "outputs": ["{options.outputFile}"],
       "options": {
         "lintFilePatterns": [
-          "packages/nx-python/**/*.ts",
-          "packages/nx-python/generators.json",
-          "packages/nx-python/executors.json",
-          "packages/nx-python/package.json",
-          "packages/nx-python/migrations.json"
+          "libs/nx-python/**/*.ts",
+          "libs/nx-python/generators.json",
+          "libs/nx-python/executors.json",
+          "libs/nx-python/package.json",
+          "libs/nx-python/migrations.json"
         ]
       }
     }
