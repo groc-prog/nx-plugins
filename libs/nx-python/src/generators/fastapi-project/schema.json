@@ -17,11 +17,6 @@
       "type": "string",
       "description": "Project description.",
       "default": ""
-    },
-    "port": {
-      "type": "number",
-      "description": "Port the application runs on.",
-      "default": 8000
     }
   },
   "required": ["name"]

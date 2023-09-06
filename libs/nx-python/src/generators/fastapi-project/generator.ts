@@ -17,7 +17,6 @@ export default async function generator(tree: Tree, schema: FastAPIProjectGenera
     description: schema.description,
     projectName,
     moduleName,
-    port: schema.port,
   });
 
   await formatFiles(tree);
