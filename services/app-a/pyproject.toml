@@ -16,6 +16,7 @@ readme = "README.md"
     [tool.poetry.dependencies.lib-a]
     path = "../../libs/lib-a"
     develop = true
+    foo = "bar"
 
 [tool.poetry.group.dev.dependencies]
 pylint = "^2.17.5"

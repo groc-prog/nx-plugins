@@ -6,6 +6,6 @@
     "esModuleInterop": true,
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "../../tools/dependency-graph.ts"],
+  "include": ["src/**/*.ts"],
   "exclude": ["jest.config.ts", "src/**/*.spec.ts", "src/**/*.test.ts", "**/*.mock.ts", "**/__test__/**/*"]
 }

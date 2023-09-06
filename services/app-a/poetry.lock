@@ -265,19 +265,6 @@ files = [
 ]
 
 [[package]]
-name = "lib-a"
-version = "0.0.0"
-description = ""
-optional = false
-python-versions = "^3.10"
-files = []
-develop = true
-
-[package.source]
-type = "directory"
-url = "../../libs/lib-a"
-
-[[package]]
 name = "mccabe"
 version = "0.7.0"
 description = "McCabe checker, plugin for flake8"
@@ -753,4 +740,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "b021646a6491fc1ab164012706defdf84bc4057aee0279d224f5a42cf227383b"
+content-hash = "007412be0e3b771b9570c1297a12b79f4a5c204b66f4859d78a5b30a429ab7b5"

@@ -37,5 +37,5 @@
     "appsDir": "services",
     "libsDir": "libs"
   },
-  "plugins": ["./libs/nx-python/src/graph/dependency-graph.ts"]
+  "plugins": ["./tools/graph/python-dependency-graph.js"]
 }
