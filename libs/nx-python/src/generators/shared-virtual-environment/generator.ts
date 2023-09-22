@@ -28,13 +28,6 @@ export default async function (tree: Tree) {
       console.log(chalk.dim(`Resolving dependencies for lib ${lib}`));
       const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
       addSharedDependencies(rootTomlConfig, projectTomlConfig);
-
-      if (rootTomlConfig.tool.poetry.dependencies[projectTomlConfig.tool.poetry.name] === undefined) {
-        rootTomlConfig.tool.poetry.dependencies[projectTomlConfig.tool.poetry.name] = {
-          path: path.join('libs', lib),
-          develop: true,
-        };
-      }
     }
   });
 
