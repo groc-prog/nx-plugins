@@ -6,6 +6,11 @@
       "schema": "./src/executors/build/schema.json",
       "description": "Wrapper for Poetry's build command."
     },
+    "dev": {
+      "implementation": "./src/executors/dev/executor",
+      "schema": "./src/executors/dev/schema.json",
+      "description": "Wrapper for a custom dev command."
+    },
     "add": {
       "implementation": "./src/executors/add/executor",
       "schema": "./src/executors/add/schema.json",

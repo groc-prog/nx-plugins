@@ -2,7 +2,17 @@ import type { FastAPIProjectGeneratorSchema } from './schema.js';
 
 import * as poetryGenerator from '../poetry-project/generator';
 import path from 'path';
-import { Tree, formatFiles, generateFiles, installPackagesTask, names, workspaceLayout } from '@nx/devkit';
+import { set } from 'lodash';
+import {
+  Tree,
+  formatFiles,
+  generateFiles,
+  installPackagesTask,
+  names,
+  workspaceLayout,
+  updateProjectConfiguration,
+  readProjectConfiguration,
+} from '@nx/devkit';
 
 export default async function generator(tree: Tree, schema: FastAPIProjectGeneratorSchema) {
   await poetryGenerator.default(tree, {
@@ -14,10 +24,17 @@ export default async function generator(tree: Tree, schema: FastAPIProjectGenera
   const moduleName = projectName.replace('-', '_');
 
   generateFiles(tree, path.join(__dirname, 'files'), path.join(workspaceLayout().appsDir, projectName), {
-    description: schema.description,
+    ...schema,
     projectName,
     moduleName,
   });
+
+  const projectConfiguration = readProjectConfiguration(tree, projectName);
+  set(projectConfiguration, 'targets.dev', {
+    executor: '@nx-python-poetry/nx-python:dev',
+    options: {},
+  });
+  updateProjectConfiguration(tree, projectName, projectConfiguration);
 
   await formatFiles(tree);
   return () => {
