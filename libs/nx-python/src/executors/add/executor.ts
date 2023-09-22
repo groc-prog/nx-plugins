@@ -1,10 +1,10 @@
 import type { SpawnSyncOptions } from 'child_process';
-import type { ExecutorContext } from '@nx/devkit';
+import type { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
 import type { AddExecutorSchema } from './schema';
 import type { PyProjectToml } from '../../utils/poetry';
 
 import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
-import { isObject, omit } from 'lodash';
+import { isObject, union, omit } from 'lodash';
 import chalk from 'chalk';
 import toml from '@iarna/toml';
 import fs from 'fs';
@@ -31,6 +31,16 @@ export default async function executor(options: AddExecutorSchema, context: Exec
       // Lock dependencies
       runPoetry(['lock'], execOpts);
       runPoetry(['install', '--sync'], execOpts);
+
+      // Add dependencies to implicitDependencies in project.json
+      const projectConfiguration: ProjectConfiguration = JSON.parse(
+        fs.readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
+      );
+      projectConfiguration.implicitDependencies = union(
+        projectConfiguration.implicitDependencies,
+        options.dependencies
+      );
+      fs.writeFileSync(path.join(projectContext.root, 'project.json'), JSON.stringify(projectConfiguration, null, 2));
     } else {
       const addArgs = ['add'];
       const additionalArgs = omit(options, ['dependencies', 'local']);

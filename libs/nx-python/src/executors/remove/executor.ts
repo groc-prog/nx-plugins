@@ -1,8 +1,9 @@
 import type { SpawnSyncOptions } from 'child_process';
-import type { ExecutorContext } from '@nx/devkit';
+import type { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
 import type { RemoveExecutorSchema } from './schema';
+import type { PyProjectToml } from '../../utils/poetry';
 
-import { PyProjectToml, checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
+import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
 import { isObject, omit } from 'lodash';
 import { parse, stringify } from '@iarna/toml';
 import fs from 'fs';
@@ -31,10 +32,20 @@ export default async function executor(options: RemoveExecutorSchema, context: E
       env: process.env,
     };
 
-    if (options.local) checkLocalDependencyRemovable(context);
-
     console.log(chalk.dim(`Removing dependencies ${options.dependencies.join(', ')}`));
     runPoetry(removeArgs, execOpts);
+
+    if (options.local) {
+      checkLocalDependencyRemovable(context);
+
+      const projectConfiguration: ProjectConfiguration = JSON.parse(
+        fs.readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
+      );
+      projectConfiguration.implicitDependencies = projectConfiguration.implicitDependencies.filter(
+        (dependency) => !options.dependencies.includes(dependency)
+      );
+      fs.writeFileSync(path.join(projectContext.root, 'project.json'), JSON.stringify(projectConfiguration, null, 2));
+    }
 
     updateSharedEnvironment(context);
 

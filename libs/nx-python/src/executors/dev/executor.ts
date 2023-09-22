@@ -20,9 +20,7 @@ export default async function executor(options: DevExecutorSchema, context: Exec
     runPoetry(['run', 'dev'], execOpts);
 
     console.log(
-      chalk.green(
-        `\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully started development server for ${context.projectName}`
-      )
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} ⛔️ Stopping development server for ${context.projectName}`)
     );
     return { success: true };
   } catch (error) {
