@@ -8,7 +8,6 @@ import commandExists from 'command-exists';
 import toml from '@iarna/toml';
 import path from 'path';
 import fs from 'fs';
-import { existsSync } from 'fs-extra';
 
 /**
  * PyProject.toml dependency. Can be a string or an object with path and develop properties if
@@ -87,7 +86,7 @@ export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void 
 export function updateSharedEnvironment(context: ExecutorContext): void {
   const rootTomlPath = path.join(context.root, 'pyproject.toml');
 
-  if (existsSync(rootTomlPath)) {
+  if (fs.existsSync(rootTomlPath)) {
     console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} Updating shared virtual environment\n`));
     const rootTomlConfig = toml.parse(fs.readFileSync(rootTomlPath, 'utf-8')) as PyProjectToml;
 
@@ -100,7 +99,7 @@ export function updateSharedEnvironment(context: ExecutorContext): void {
       console.log(chalk.dim(`Checking ${project} for changes`));
       const projectTomlPath = path.join(context.projectsConfigurations.projects[project].root, 'pyproject.toml');
 
-      if (!existsSync(projectTomlPath)) return;
+      if (!fs.existsSync(projectTomlPath)) return;
 
       const projectTomlConfig = toml.parse(fs.readFileSync(projectTomlPath, 'utf-8')) as PyProjectToml;
       addSharedDependencies(rootTomlConfig, projectTomlConfig);

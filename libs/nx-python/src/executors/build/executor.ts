@@ -111,7 +111,7 @@ function copyDependencyProject(
 ): void {
   const ignorePaths = IGNORED_PATHS.map((ignorePath) => path.join(dependencyProjectPath, ignorePath));
 
-  console.log(chalk.dim(`Copying dependency ${dependencyName} to build directory`));
+  console.log(chalk.dim(`Copying dependency ${dependencyName} to ${buildFolderPath}`));
   copySync(dependencyProjectPath, buildFolderPath, { filter: (file) => !ignorePaths.includes(file) });
   pyProjectTomlData.tool.poetry.packages.push({ include: dependencyName.replace('-', '_') });
 }

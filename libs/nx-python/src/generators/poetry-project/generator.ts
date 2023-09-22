@@ -2,6 +2,7 @@ import type { PoetryProjectGeneratorSchema } from './schema.d.ts';
 
 import path from 'path';
 import {
+  ProjectConfiguration,
   Tree,
   addProjectConfiguration,
   formatFiles,
@@ -18,7 +19,7 @@ export default async function generator(tree: Tree, schema: PoetryProjectGenerat
       ? path.join(workspaceLayout().appsDir, projectName)
       : path.join(workspaceLayout().libsDir, projectName);
 
-  addProjectConfiguration(tree, projectName, {
+  const projectConfiguration: ProjectConfiguration = {
     root: target,
     projectType: schema.type,
     sourceRoot: target,
@@ -45,13 +46,6 @@ export default async function generator(tree: Tree, schema: PoetryProjectGenerat
         executor: '@nx-python-poetry/nx-python:lock',
         options: {},
       },
-      build: {
-        executor: '@nx-python-poetry/nx-python:build',
-        options: {
-          outputPath: 'dist',
-          ignorePaths: [],
-        },
-      },
       black: {
         executor: '@nx-python-poetry/nx-python:black',
         options: {},
@@ -65,7 +59,18 @@ export default async function generator(tree: Tree, schema: PoetryProjectGenerat
         options: {},
       },
     },
-  });
+  };
+
+  if (schema.type === 'application')
+    projectConfiguration.targets.build = {
+      executor: '@nx-python-poetry/nx-python:build',
+      options: {
+        outputPath: 'dist',
+        ignorePaths: [],
+      },
+    };
+
+  addProjectConfiguration(tree, projectName, projectConfiguration);
   generateFiles(tree, path.join(__dirname, 'files'), target, {
     description: schema.description,
     projectName,

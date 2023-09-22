@@ -1,0 +1,42 @@
+{
+  "name": "lib-1",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "projectType": "library",
+  "sourceRoot": "libs/lib-1",
+  "targets": {
+    "install": {
+      "executor": "@nx-python-poetry/nx-python:install",
+      "options": {}
+    },
+    "add": {
+      "executor": "@nx-python-poetry/nx-python:add",
+      "options": {
+        "local": false
+      }
+    },
+    "remove": {
+      "executor": "@nx-python-poetry/nx-python:remove",
+      "options": {}
+    },
+    "update": {
+      "executor": "@nx-python-poetry/nx-python:update",
+      "options": {}
+    },
+    "lock": {
+      "executor": "@nx-python-poetry/nx-python:lock",
+      "options": {}
+    },
+    "black": {
+      "executor": "@nx-python-poetry/nx-python:black",
+      "options": {}
+    },
+    "pylint": {
+      "executor": "@nx-python-poetry/nx-python:pylint",
+      "options": {}
+    },
+    "pyright": {
+      "executor": "@nx-python-poetry/nx-python:pyright",
+      "options": {}
+    }
+  }
+}

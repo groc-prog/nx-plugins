@@ -2,11 +2,11 @@ import type { PyProjectToml } from '../../utils/poetry';
 import type { Tree } from '@nx/devkit';
 
 import { formatFiles, generateFiles, installPackagesTask } from '@nx/devkit';
-import { existsSync } from 'fs-extra';
 import { parse, stringify } from '@iarna/toml';
 import { runPoetry, addSharedDependencies } from '../../utils/poetry';
 import path from 'path';
 import chalk from 'chalk';
+import fs from 'fs';
 
 export default async function (tree: Tree) {
   process.chdir(tree.root);
@@ -24,7 +24,7 @@ export default async function (tree: Tree) {
   tree.children('libs').forEach((lib) => {
     const projectTomlPath = path.join('libs', lib, 'pyproject.toml');
 
-    if (existsSync(projectTomlPath)) {
+    if (fs.existsSync(projectTomlPath)) {
       console.log(chalk.dim(`Resolving dependencies for lib ${lib}`));
       const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
       addSharedDependencies(rootTomlConfig, projectTomlConfig);
@@ -35,7 +35,7 @@ export default async function (tree: Tree) {
   tree.children('services').forEach((service) => {
     const projectTomlPath = path.join('services', service, 'pyproject.toml');
 
-    if (existsSync(projectTomlPath)) {
+    if (fs.existsSync(projectTomlPath)) {
       console.log(chalk.dim(`Resolving dependencies for service ${service}`));
       const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
       addSharedDependencies(rootTomlConfig, projectTomlConfig);
