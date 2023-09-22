@@ -5,8 +5,6 @@ const fs = require('fs');
 const toml = require('@iarna/toml');
 
 exports.processProjectGraph = (graph, context) => {
-  console.log(context);
-  // process.chdir();
   const builder = new ProjectGraphBuilder(graph);
 
   // Resolve dependencies between projects

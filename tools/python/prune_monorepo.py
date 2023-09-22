@@ -21,11 +21,23 @@ class ProjectConfiguration(TypedDict):
 logger = get_logger("prune_monorepo")
 
 # Read JSON from stdin produces by NX
-root_path = os.path.join("..", "..")
 project_configuration: ProjectConfiguration
+service = os.environ.get("NX_PYTHON_POETRY_SERVICE", None)
+ignore_pattern = shutil.ignore_patterns("node_modules", "out", "dist", "venv", ".venv")
+build_files = [
+    ".gitignore",
+    "package.json",
+    "pnpm-lock.yaml",
+    "nx.json",
+    "tsconfig.base.json",
+]
+
+if service is None:
+    logger.error("Could not find 'NX_PYTHON_POETRY_SERVICE' environment variable")
+    sys.exit(1)
 
 logger.info("Reading project configuration from project.json file")
-with open(os.path.join(root_path, "project.json"), "r", encoding="utf-8") as project_file:
+with open(os.path.join("services", service, "project.json"), "r", encoding="utf-8") as project_file:
     project_configuration = json.load(project_file)
 
 implicit_dependencies = project_configuration.get("implicitDependencies", [])
@@ -38,12 +50,12 @@ else:
     shutil.rmtree("out")
     os.mkdir("out")
 
-# Copy libs from implicit dependencies into out directory
+
 logger.info("Copying implicit dependencies into out directory")
 for dependency in implicit_dependencies:
     logger.debug("Building paths for dependency %s", dependency)
-    source_dir = os.path.join(root_path, "libs", dependency)
-    out_dir = os.path.join("out", dependency)
+    source_dir = os.path.join("libs", dependency)
+    out_dir = os.path.join("out", "libs", dependency)
 
     if not os.path.exists(source_dir):
         logger.error("Could not find dependency %s", dependency)
@@ -54,12 +66,12 @@ for dependency in implicit_dependencies:
         sys.exit(1)
 
     logger.debug("Copying %s to %s", source_dir, out_dir)
-    shutil.copytree(source_dir, out_dir)
+    shutil.copytree(source_dir, out_dir, ignore=ignore_pattern)
 
-# Copy the application into the out directory
+
 logger.info("Copying application into out directory")
-source_dir = os.path.join(root_path, "services", project_configuration["name"])
-out_dir = os.path.join("out", project_configuration["name"])
+source_dir = os.path.join("services", project_configuration["name"])
+out_dir = os.path.join("out", "services", project_configuration["name"])
 
 if not os.path.exists(source_dir):
     logger.error("Could not find application %s", project_configuration["name"])
@@ -70,11 +82,30 @@ if not os.path.isdir(source_dir):
     sys.exit(1)
 
 logger.debug("Copying %s to %s", source_dir, out_dir)
-shutil.copytree(source_dir, out_dir)
+shutil.copytree(source_dir, out_dir, ignore=ignore_pattern)
 
-# Copy the package.json and package-lock.json files into the out directory
-logger.info("Copying package.json and package-lock.json files into out directory")
-shutil.copy(os.path.join(root_path, "package.json"), "out")
-shutil.copy(os.path.join(root_path, "package-lock.json"), "out")
+
+logger.info("Copying dependency graph plugin into out directory")
+source_dir = os.path.join("tools", "plugins")
+out_dir = os.path.join("out", "tools", "plugins")
+
+if not os.path.exists(source_dir):
+    logger.error("Could not find dependency graph plugin")
+    sys.exit(1)
+
+if not os.path.isdir(source_dir):
+    logger.error("Dependency graph plugin is not a directory")
+    sys.exit(1)
+
+logger.debug("Copying %s to %s", source_dir, out_dir)
+shutil.copytree(source_dir, out_dir, ignore=ignore_pattern)
+
+
+logger.info("Copying build files into out directory")
+for build_file in build_files:
+    out_path = os.path.join("out", build_file)
+
+    logger.debug("Copying %s to %s", build_file, out_path)
+    shutil.copy(build_file, out_path)
 
 logger.info("Pruning complete")

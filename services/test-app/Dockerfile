@@ -1,11 +1,21 @@
-# Setup PNPM and NX
-FROM node:20-alpine AS nx-base
-RUN echo "Setting up PNPM and NX"
+# Base image for building services with Python, Poetry and NX
+# We need both PNPM and Poetry for the build process since the nx executors internally call poetry commands
+FROM node:20-alpine AS base
+RUN apk add --no-cache libc6-compat
+RUN apk update
 WORKDIR /app
 
 ENV PNPM_HOME=/usr/local/bin \
   PATH="$PATH:$PNPM_HOME" \
-  NX_VERSION=16.3.2
+  NX_VERSION=16.3.2 \
+  PYTHON_VERSION=3.11.5-r0 \
+  PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  POETRY_VERSION=1.5.1
 
 RUN echo "Installing PNPM"
 RUN id=pnpm-store,target=/root/.pnpm-store npm install -g pnpm
@@ -13,11 +23,24 @@ RUN id=pnpm-store,target=/root/.pnpm-store npm install -g pnpm
 RUN echo "Installing NX version $NX_VERSION"
 RUN pnpm add -g nx@$NX_VERSION
 
+RUN echo "Installing python version $PYTHON_VERSION"
+RUN apk add --no-cache python3=$PYTHON_VERSION py3-pip
 
-# Setup Python with Poetry
-FROM python:3.10-bullseye as poetry-base
-RUN echo "Setting up Python with Poetry"
-WORKDIR /app
+ENV PYTHONFAULTHANDLER=1 \
+  PYTHONUNBUFFERED=1 \
+  PYTHONHASHSEED=random \
+  PIP_NO_CACHE_DIR=off \
+  PIP_DISABLE_PIP_VERSION_CHECK=on \
+  PIP_DEFAULT_TIMEOUT=100 \
+  POETRY_VERSION=1.5.1
+
+RUN echo "Installing poetry version $POETRY_VERSION"
+RUN pip3 install "poetry==$POETRY_VERSION"
+
+
+# Base image for service runner
+# We don't need NX for running the service, so might as well leave it out
+FROM python:3.10-slim-bookworm as runner-base
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -31,61 +54,51 @@ RUN echo "Installing poetry version $POETRY_VERSION"
 RUN pip install "poetry==$POETRY_VERSION"
 
 
-# Use NX to get the project configuration
-FROM nx-base as project-config
+# Prune monorepo to only include the service/libs we want to build
+# Decreases final image size drastically the bigger the monorepo becomes
+FROM base AS prune
 WORKDIR /app
-RUN apk add --no-cache libc6-compat
-RUN apk update
 
-RUN echo "Copying monorepo files"
+ENV NX_PYTHON_POETRY_SERVICE="test-app"
+
 COPY . .
-
-RUN ls -la
-
-RUN echo "Getting project configuration"
-RUN nx show project test-app > project.json
-
-
-# Run the monorepo pruner to remove unnecessary files
-# see `tools/python/prune_monorepo.py`
-FROM poetry-base as prune
-WORKDIR /app
-
-COPY --from=project-config . .
 
 RUN echo "Pruning monorepo"
 RUN python tools/python/prune_monorepo.py
 
 
-# Build applciation artifacts and unpack them
-FROM poetry-base as builder
+# Install NX dependencies and build the artifacts for the service
+# Building the actual artefacts is handeled by the NX executor (see `libs/nx-python/executors/build`)
+FROM base AS builder
 WORKDIR /app
 
-COPY .gitignore .gitignore
-COPY --from=prune /app/out/ .
+COPY --from=prune /app/out .
 
-RUN echo "Building application"
+RUN echo "Installing NX dependencies"
+RUN pnpm install --frozen-lockfile
+
+RUN echo "Building artifacts"
 RUN nx run test-app:build
 
 RUN echo "Unpacking artifacts"
-RUN tar -xzf /app/services/test-app/dist/test_app-0.0.0.tar.gz -C /app/services/test-app/dist/test_app
+RUN mkdir -p /app/services/test-app/dist/test_app-0.0.0
+RUN tar -xzf /app/services/test-app/dist/test_app-0.0.0.tar.gz -C /app/services/test-app/dist/test_app-0.0.0 --strip-components=1
+
+RUN mv /app/services/test-app/dist/test_app-0.0.0 /app/services/test-app/dist/test_app
 
 
-# Install poetry dependencies
-FROM poetry-base as installer
+# Finally run the service, use base image for runner here since we don't need NX anymore
+FROM runner-base AS runner
 WORKDIR /app
 
 COPY --from=builder /app/services/test-app/dist/test_app .
 
-RUN echo "Installing dependencies"
-RUN poetry install
+RUN echo "Installing Python dependencies"
+RUN poetry config virtualenvs.create false
+RUN poetry install --without=dev --no-interaction --no-ansi
 
+RUN groupadd -g 999 appuser
+RUN useradd -r -u 999 -g appuser appuser
+USER appuser
 
-# Run the application
-FROM poetry-base as runner
-WORKDIR /app
-
-COPY --from=installer /app .
-
-RUN echo "Running application"
-CMD ["python", "-m", "uvicorn", "test_app.main:app", "--host", "--port", "8000"]
+CMD ["uvicorn", "test_app.main:app", "--host", "0.0.0.0", "--port", "8000"]

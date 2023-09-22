@@ -51,6 +51,7 @@
     }
   },
   "implicitDependencies": [
+    "nx-python",
     "lib-1"
   ]
 }

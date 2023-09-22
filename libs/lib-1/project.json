@@ -38,5 +38,8 @@
       "executor": "@nx-python-poetry/nx-python:pyright",
       "options": {}
     }
-  }
+  },
+  "implicitDependencies": [
+    "nx-python"
+  ]
 }
