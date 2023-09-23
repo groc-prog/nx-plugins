@@ -6,11 +6,6 @@
       "schema": "./src/executors/build/schema.json",
       "description": "Wrapper for Poetry's build command. Builds the service and it's libraries into a single package."
     },
-    "dev": {
-      "implementation": "./src/executors/dev/executor",
-      "schema": "./src/executors/dev/schema.json",
-      "description": "Wrapper for a custom dev script. Starts a development server on the defined host/port. Takes no arguments."
-    },
     "add": {
       "implementation": "./src/executors/add/executor",
       "schema": "./src/executors/add/schema.json",
