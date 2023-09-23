@@ -14,8 +14,8 @@ export default async function executor(options: LockExecutorSchema, context: Exe
     console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🚀 Updating lockfile for ${context.projectName}\n`));
 
     // Add any additional arguments to the command
-    const installArgs = ['lock'];
-    installArgs.push(...Object.entries(options).map(([key, value]) => `--${key}=${value}`));
+    const lockArgs = ['lock'];
+    lockArgs.push(...Object.entries(options).map(([key, value]) => `--${key}=${value}`));
 
     const execOpts: SpawnSyncOptions = {
       cwd: projectContext.root,
@@ -23,7 +23,7 @@ export default async function executor(options: LockExecutorSchema, context: Exe
     };
 
     console.log(chalk.dim('Updating lockfile'));
-    runPoetry(installArgs, execOpts);
+    runPoetry(lockArgs, execOpts);
 
     updateSharedEnvironment(context);
 

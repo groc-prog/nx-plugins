@@ -1,4 +1,4 @@
-# FastAPI application <%= projectName %>
+# gRPC application <%= projectName %>
 
 ## 🚀 How to run locally
 
@@ -8,7 +8,7 @@ Install dependencies:
 pnpx nx run <%= projectName %>:install
 ```
 
-Activate virtual environment created at `<%= projectName %>/.venv` and run the FastAPI server:
+Activate virtual environment created at `<%= projectName %>/.venv` and run the gRPC server:
 ```bash
 pnpx nx run <%= projectName %>:dev
 ```
@@ -19,9 +19,9 @@ Install dependencies:
 pnpx nx run <%= projectName %>:install
 ```
 
-Activate virtual environment created at `<%= projectName %>/.venv` and run the FastAPI server:
+Activate virtual environment created at `<%= projectName %>/.venv` and run the gRPC server:
 ```bash
-uvicorn <%= projectName %>.main:app --host="0.0.0.0" --port="<%= port %>"
+python <%= projectName %>/main.py
 ```
 
 

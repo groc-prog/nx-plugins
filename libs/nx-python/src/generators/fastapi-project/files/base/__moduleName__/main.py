@@ -15,7 +15,7 @@ def app_root():
     return {"Hello": "World"}
 
 
-def start():
+def dev():
     """
     Starts the FastAPI application.
     """

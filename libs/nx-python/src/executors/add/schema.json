@@ -17,5 +17,7 @@
       "default": false
     }
   },
-  "required": ["dependencies"]
+  "required": [
+    "dependencies"
+  ]
 }

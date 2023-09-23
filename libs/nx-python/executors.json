@@ -4,52 +4,52 @@
     "build": {
       "implementation": "./src/executors/build/executor",
       "schema": "./src/executors/build/schema.json",
-      "description": "Wrapper for Poetry's build command."
+      "description": "Wrapper for Poetry's build command. Builds the service and it's libraries into a single package."
     },
     "dev": {
       "implementation": "./src/executors/dev/executor",
       "schema": "./src/executors/dev/schema.json",
-      "description": "Wrapper for a custom dev command."
+      "description": "Wrapper for a custom dev script. Starts a development server on the defined host/port. Takes no arguments."
     },
     "add": {
       "implementation": "./src/executors/add/executor",
       "schema": "./src/executors/add/schema.json",
-      "description": "Wrapper for Poetry's add command."
+      "description": "Wrapper for Poetry's add command. Accepts all arguments that Poetry's add command accepts with the addition of a --local flag for adding local libraries."
     },
     "install": {
       "implementation": "./src/executors/install/executor",
       "schema": "./src/executors/install/schema.json",
-      "description": "Wrapper for Poetry's install command."
+      "description": "Wrapper for Poetry's install command. Accepts all arguments that Poetry's install command accepts."
     },
     "update": {
       "implementation": "./src/executors/update/executor",
       "schema": "./src/executors/update/schema.json",
-      "description": "Wrapper for Poetry's update command."
+      "description": "Wrapper for Poetry's update command. Accepts all arguments that Poetry's update command accepts."
     },
     "remove": {
       "implementation": "./src/executors/remove/executor",
       "schema": "./src/executors/remove/schema.json",
-      "description": "Wrapper for Poetry's remove command."
-    },
-    "black": {
-      "implementation": "./src/executors/black/executor",
-      "schema": "./src/executors/black/schema.json",
-      "description": "Wrapper for black formatter."
-    },
-    "pylint": {
-      "implementation": "./src/executors/pylint/executor",
-      "schema": "./src/executors/pylint/schema.json",
-      "description": "Wrapper for pylint linter."
+      "description": "Wrapper for Poetry's remove command. Accepts all arguments that Poetry's remove command accepts with the addition of a --local flag for removing local libraries."
     },
     "lock": {
       "implementation": "./src/executors/lock/executor",
       "schema": "./src/executors/lock/schema.json",
-      "description": "Wrapper for Poetry's lock command."
+      "description": "Wrapper for Poetry's lock command. Accepts all arguments that Poetry's lock command accepts."
+    },
+    "black": {
+      "implementation": "./src/executors/black/executor",
+      "schema": "./src/executors/black/schema.json",
+      "description": "Wrapper for black formatter. Takes no arguments."
+    },
+    "pylint": {
+      "implementation": "./src/executors/pylint/executor",
+      "schema": "./src/executors/pylint/schema.json",
+      "description": "Wrapper for pylint linter. Takes no arguments."
     },
     "pyright": {
       "implementation": "./src/executors/pyright/executor",
       "schema": "./src/executors/pyright/schema.json",
-      "description": "Wrapper for pyright type checker."
+      "description": "Wrapper for pyright type checker. Takes no arguments."
     }
   }
 }

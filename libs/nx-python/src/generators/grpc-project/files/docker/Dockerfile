@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 # Base image for building services with Python, Poetry and NX
 # We need both PNPM and Poetry for the build process since the nx executors internally call poetry commands
 FROM node:20-alpine AS base
@@ -59,7 +61,7 @@ RUN pip install "poetry==$POETRY_VERSION"
 FROM base AS prune
 WORKDIR /app
 
-ENV NX_PYTHON_POETRY_SERVICE="test-app"
+ENV NX_PYTHON_POETRY_SERVICE="<%= projectName %>"
 
 COPY . .
 
@@ -78,20 +80,20 @@ RUN echo "Installing NX dependencies"
 RUN pnpm install --frozen-lockfile
 
 RUN echo "Building artifacts"
-RUN nx run test-app:build
+RUN nx run <%= projectName %>:build
 
 RUN echo "Unpacking artifacts"
-RUN mkdir -p /app/services/test-app/dist/test_app-0.0.0
-RUN tar -xzf /app/services/test-app/dist/test_app-0.0.0.tar.gz -C /app/services/test-app/dist/test_app-0.0.0 --strip-components=1
+RUN mkdir -p /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0
+RUN tar -xzf /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0.tar.gz -C /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0 --strip-components=1
 
-RUN mv /app/services/test-app/dist/test_app-0.0.0 /app/services/test-app/dist/test_app
+RUN mv /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0 /app/services/<%= projectName %>/dist/<%= moduleName %>
 
 
 # Finally run the service, use base image for runner here since we don't need NX anymore
 FROM runner-base AS runner
 WORKDIR /app
 
-COPY --from=builder /app/services/test-app/dist/test_app .
+COPY --from=builder /app/services/<%= projectName %>/dist/<%= moduleName %> .
 
 RUN echo "Installing Python dependencies"
 RUN poetry config virtualenvs.create false
@@ -101,4 +103,4 @@ RUN groupadd -g 999 appuser
 RUN useradd -r -u 999 -g appuser appuser
 USER appuser
 
-CMD ["uvicorn", "test_app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "<%= moduleName %>.main:app", "--host", "0.0.0.0", "--port", "<%= port %>"]

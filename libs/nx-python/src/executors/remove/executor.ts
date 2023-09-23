@@ -38,6 +38,7 @@ export default async function executor(options: RemoveExecutorSchema, context: E
     if (options.local) {
       checkLocalDependencyRemovable(context);
 
+      console.log(chalk.dim(`Syncing implicit dependencies for project`));
       const projectConfiguration: ProjectConfiguration = JSON.parse(
         fs.readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
       );

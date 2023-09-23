@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
   "title": "Remove dependencies from the project.",
-  "description": "Runs `poetry add <dependencies> <args>` in the current project or library. When removing local dependencies, the `--local` has to be set to `true`.",
+  "description": "Runs `poetry remove <dependencies> <args>` in the current project or library. When removing local dependencies, the `--local` has to be set to `true`.",
   "type": "object",
   "properties": {
     "dependencies": {
@@ -17,5 +17,7 @@
       "default": false
     }
   },
-  "required": ["dependencies"]
+  "required": [
+    "dependencies"
+  ]
 }

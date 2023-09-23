@@ -14,6 +14,10 @@ from logger import get_logger
 
 
 class ProjectConfiguration(TypedDict):
+    """
+    The configuration of a project.
+    """
+
     name: str
     implicitDependencies: List[str]
 

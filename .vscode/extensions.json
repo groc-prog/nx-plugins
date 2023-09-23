@@ -1,0 +1,12 @@
+{
+  "recommendations": [
+    "nrwl.angular-console",
+    "ms-python.python",
+    "ms-python.black-formatter",
+    "ms-python.isort",
+    "ms-python.vscode-pylance",
+    "ms-python.pylint",
+    "Cameron.vscode-pytest",
+    "ms-azuretools.vscode-docker"
+  ]
+}

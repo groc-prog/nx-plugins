@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/schema",
   "title": "Builds the current project and all if it's local dependencies.",
-  "description": "Builds the current project and all if it's local dependencies into a single wheel or source distribution.",
+  "description": "Builds the current project and all if it's local dependencies into a single wheel/package.",
   "type": "object",
   "properties": {
     "outputPath": {

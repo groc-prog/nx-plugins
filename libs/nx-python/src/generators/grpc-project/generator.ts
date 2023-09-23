@@ -1,10 +1,10 @@
-import type { FastAPIProjectGeneratorSchema } from './schema.js';
+import type { GRPCProjectGeneratorSchema } from './schema.js';
 
 import * as poetryGenerator from '../poetry-project/generator';
 import path from 'path';
 import { Tree, formatFiles, generateFiles, installPackagesTask, names, workspaceLayout } from '@nx/devkit';
 
-export default async function generator(tree: Tree, schema: FastAPIProjectGeneratorSchema) {
+export default async function generator(tree: Tree, schema: GRPCProjectGeneratorSchema) {
   await poetryGenerator.default(tree, {
     ...schema,
     type: 'application',

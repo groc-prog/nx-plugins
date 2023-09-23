@@ -4,6 +4,10 @@ const path = require('path');
 const fs = require('fs');
 const toml = require('@iarna/toml');
 
+/**
+ * This plugin will add implicit dependencies between projects based on the dependencies defined in the pyproject.toml
+ * file of each project.
+ */
 exports.processProjectGraph = (graph, context) => {
   const builder = new ProjectGraphBuilder(graph);
 

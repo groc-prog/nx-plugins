@@ -16,7 +16,7 @@ export default async function executor(options: AddExecutorSchema, context: Exec
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 📦 Installing dependencies for ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 📦 Adding dependencies for ${context.projectName}\n`));
 
     const execOpts: SpawnSyncOptions = {
       cwd: projectContext.root,
@@ -33,6 +33,7 @@ export default async function executor(options: AddExecutorSchema, context: Exec
       runPoetry(['install', '--sync'], execOpts);
 
       // Add dependencies to implicitDependencies in project.json
+      console.log(chalk.dim(`Syncing implicit dependencies for project`));
       const projectConfiguration: ProjectConfiguration = JSON.parse(
         fs.readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
       );

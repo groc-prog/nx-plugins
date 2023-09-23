@@ -1,4 +1,4 @@
-export interface FastAPIProjectGeneratorSchema {
+export interface GRPCProjectGeneratorSchema {
   /**
    * Name of the project.
    */
@@ -10,9 +10,9 @@ export interface FastAPIProjectGeneratorSchema {
   description: string;
   /**
    * Port to run the FastAPI server on.
-   * @default 8000
+   * @default '[::]:50051'
    */
-  port: number;
+  port: string;
   /**
    * Whether to include a Dockerfile.
    * @default true

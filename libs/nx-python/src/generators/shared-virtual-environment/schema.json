@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/schema",
   "$id": "SharedVirtualEnvironment",
   "title": "Migrate NX workspace to a shared virtual environment.",
+  "description": "Generates top-level pyproject.toml and poetry.lock files which contain all the dependencies of the NX workspace. Dependencies are automatically kept up-to-date if any dependencies in the applications/libraries change.",
   "type": "object",
   "properties": {},
   "required": []

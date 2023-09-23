@@ -2,6 +2,7 @@
   "$schema": "http://json-schema.org/schema",
   "$id": "PoetryProject",
   "title": "Generate a new Python project using Poetry.",
+  "description": "Generates a new, empty Poetry application or library.",
   "type": "object",
   "properties": {
     "name": {
@@ -17,7 +18,10 @@
       "type": "string",
       "description": "Project type.",
       "default": "application",
-      "enum": ["application", "library"]
+      "enum": [
+        "application",
+        "library"
+      ]
     },
     "description": {
       "type": "string",
@@ -25,5 +29,8 @@
       "default": ""
     }
   },
-  "required": ["name", "type"]
+  "required": [
+    "name",
+    "type"
+  ]
 }
