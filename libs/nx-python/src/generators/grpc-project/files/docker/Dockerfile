@@ -103,4 +103,4 @@ RUN groupadd -g 999 appuser
 RUN useradd -r -u 999 -g appuser appuser
 USER appuser
 
-CMD ["uvicorn", "<%= moduleName %>.main:app", "--host", "0.0.0.0", "--port", "<%= port %>"]
+CMD ["python", "<%= moduleName %>/main.py"]
