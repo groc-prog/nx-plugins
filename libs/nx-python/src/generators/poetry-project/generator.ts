@@ -59,7 +59,6 @@ export default async function generator(tree: Tree, schema: PoetryProjectGenerat
         options: {},
       },
     },
-    implicitDependencies: ['nx-python'],
   };
 
   if (schema.type === 'application')

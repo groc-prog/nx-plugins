@@ -57,8 +57,5 @@
   "workspaceLayout": {
     "appsDir": "services",
     "libsDir": "libs"
-  },
-  "plugins": [
-    "./tools/plugins/pythonDependencyGraph.js"
-  ]
+  }
 }

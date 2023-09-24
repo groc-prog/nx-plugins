@@ -6,7 +6,9 @@
   "targets": {
     "build": {
       "executor": "@nx/js:tsc",
-      "outputs": ["{options.outputPath}"],
+      "outputs": [
+        "{options.outputPath}"
+      ],
       "options": {
         "outputPath": "dist/libs/nx-python",
         "main": "libs/nx-python/src/index.ts",
@@ -38,7 +40,9 @@
     },
     "lint": {
       "executor": "@nx/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+      "outputs": [
+        "{options.outputFile}"
+      ],
       "options": {
         "lintFilePatterns": [
           "libs/nx-python/**/*.ts",
@@ -50,5 +54,7 @@
       }
     }
   },
-  "tags": []
+  "tags": [
+    "internal"
+  ]
 }
