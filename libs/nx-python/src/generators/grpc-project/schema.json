@@ -1,13 +1,13 @@
 {
   "$schema": "http://json-schema.org/schema",
-  "$id": "FastAPIProject",
+  "$id": "gRPCProject",
   "title": "Generate a new gRPC project using Poetry.",
   "description": "Generates a new, empty gRPC project with all necessary dependencies using Poetry.",
   "type": "object",
   "properties": {
     "name": {
       "type": "string",
-      "description": "",
+      "description": "Name of the project.",
       "$default": {
         "$source": "argv",
         "index": 0

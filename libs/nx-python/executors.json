@@ -50,6 +50,11 @@
       "implementation": "./src/executors/pyright/executor",
       "schema": "./src/executors/pyright/schema.json",
       "description": "Wrapper for pyright type checker. Takes no arguments."
+    },
+    "pytest": {
+      "implementation": "./src/executors/pytest/executor",
+      "schema": "./src/executors/pytest/schema.json",
+      "description": "Wrapper for pytest test runner. Takes no arguments."
     }
   }
 }

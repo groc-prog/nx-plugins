@@ -58,6 +58,10 @@ export default async function generator(tree: Tree, schema: PoetryProjectGenerat
         executor: '@nx-python-poetry/nx-python:pyright',
         options: {},
       },
+      pytest: {
+        executor: '@nx-python-poetry/nx-python:pytest',
+        options: {},
+      },
     },
   };
 

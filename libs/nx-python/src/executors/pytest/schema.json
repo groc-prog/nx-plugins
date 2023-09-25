@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Testing with pytest",
+  "description": "Runs pytest in the current project or library.",
+  "type": "object",
+  "properties": {},
+  "required": []
+}

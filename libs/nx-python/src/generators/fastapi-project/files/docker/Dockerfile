@@ -66,7 +66,7 @@ ENV NX_PYTHON_POETRY_SERVICE="<%= projectName %>"
 COPY . .
 
 RUN echo "Pruning monorepo"
-RUN python tools/python/prune_monorepo.py
+RUN python tools/docker/prune_monorepo.py
 
 
 # Install NX dependencies and build the artifacts for the service
