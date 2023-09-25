@@ -10,7 +10,7 @@ NX provides special tooling which can be used with some IDE's to improve the dev
 
 
 ## 🚀 Generators
-The internal `nx-python` library provides a few generators quickly scaffold new projects, apps, and libs. Here is a list of all available generators:
+The internal `nx-python` library provides a few generators quickly scaffold new projects, applications, and libraries. Here is a list of all available generators:
 
 - `nx generate @nx-python-poetry/nx-python:poetry-project`: Creates a new poetry project. The project can either be a library or an application.
 - `nx generate @nx-python-poetry/nx-python:fastapi-project`: Creates a new FastAPI project with all the necessary dependencies and minimal configuration.
@@ -38,6 +38,12 @@ Before you generate your shared virtual environment you have to make sure that t
 If any of these requirements are not met, the generator will throw an error and stop the process.
 
 
+#### Syncing the shared virtual environment
+Should you (for whatever reason) need to sync the shared virtual environment, you can do so by running the `install` executor in any of the projects. This will update the `pyproject.toml` and `poetry.lock` files in the root of your workspace to match the dependencies of the projects in your workspace.
+
+> **Note**: If you ever feel the need to manually update the `pyproject.toml` and `poetry.lock` anywhere, just know when the time comes, you will get a free trip to the gulag.
+
+
 ## 📜 Executors
 Like with generators, the `nx-python` library also provides a few executors to run common tasks. The easiest way to use executors is by using the UI NX provides with plugins as described in the [`IDE setup and tooling`](#ide-setup-and-tooling) section. Here is a list of all available executors:
 
@@ -50,6 +56,8 @@ The following executors can be used to manage dependencies in your projects:
 - `nx run <project>:update`: Updates dependencies in the project. If you want to update multiple dependencies, you can separate them with a comma.
 - `nx run <project>:install`: Installs all dependencies in the project from the `poetry.lock` file.
 - `nx run <project>:lock`: Locks all dependencies in the project to the `poetry.lock` file.
+
+> **Note**: If you have a shared virtual environment, all of the above commands will also affect the `pyproject.toml` and `poetry.lock` files in the root of your workspace.
 
 
 ### Development, testing and building applications
@@ -70,7 +78,15 @@ There are also a few utility executors for linting, type-checking and formatting
 - `nx run <project>:pyright`: Type-checking with Pyright.
 
 
-## Dependency visualization
+## 🐳 Usage with docker <a name="usage-with-docker"></a>
+This monorepo provides a `custom script for pruning files for docker` under tools/docker/prune_monorepo.py. This allows for the final image to only contain the files which are actually needed for the application to work, which effectively minimizes the image size.
+
+Because this is a monorepo, we have to copy the whole workspace over into the docker environment so we can build the application and run it, which unnecessarily bloats the image with libraries and other applications. The solution: `Removing everything not needed for the application to work`.
+
+The script generates a `out` directory which only contains the application and libraries needed for the build. Then, with some more docker magic, the different environments for building the application (in this case a NodeJS environment for running NX and a Python for Poetry) are set up inside the docker container and your applications is ready to go.
+
+
+## 📊 Dependency visualization
 The `nx-python` library uses `implicitDependencies` for [`docker builds`](#usage-with-docker), which means it also enables the graph provided by NX to visualize the dependencies between python services/libraries. Just run the following code in the command line:
 
 ```bash
@@ -78,11 +94,3 @@ nx graph
 ```
 
 For more info on the `NX graph`, see the [`official documentation`](https://nx.dev/core-features/explore-graph#explore-the-graph)
-
-
-## Usage with docker <a name="usage-with-docker"></a>
-This monorepo provides a `custom script for pruning files for docker` under tools/docker/prune_monorepo.py. This allows for the final image to only contain the files which are actually needed for the application to work, which effectively minimizes the image size.
-
-Because this is a monorepo, we have to copy the whole workspace over into the docker environment so we can build the application and run it, which unnecessarily bloats the image with libraries and other applications. The solution: **`Removing everything not needed for the application to work`**.
-
-The script generates a `out` directory which only contains the application and libraries needed for the build. Then, with some more docker magic, the different environments for building the application (in this case a NodeJS environment for running NX and a Python for Poetry) are set up inside the docker container and your applications is ready to go.
