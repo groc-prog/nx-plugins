@@ -11,6 +11,11 @@
       "schema": "./src/executors/add/schema.json",
       "description": "Wrapper for Poetry's add command. Accepts all arguments that Poetry's add command accepts with the addition of a --local flag for adding local libraries."
     },
+    "dev": {
+      "implementation": "./src/executors/dev/executor",
+      "schema": "./src/executors/dev/schema.json",
+      "description": "Wrapper for a custom dev script. Starts a development server on the defined host/port. Takes no arguments."
+    },
     "install": {
       "implementation": "./src/executors/install/executor",
       "schema": "./src/executors/install/schema.json",

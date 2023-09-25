@@ -10,6 +10,14 @@ import path from 'path';
 import fs from 'fs';
 
 /**
+ * Supported service types for local development servers.
+ */
+export enum ServiceKind {
+  FAST_API = 'fastapi',
+  GRPC = 'grpc',
+}
+
+/**
  * PyProject.toml dependency. Can be a string or an object with path and develop properties if
  * it is a lib.
  */
@@ -21,6 +29,16 @@ export type PyProjectTomlDependency = string | { path?: string; develop?: boolea
 export type PyProjectTomlDependencies = {
   [key: string]: PyProjectTomlDependency;
 };
+
+/**
+ * PyProject.toml nx config.
+ */
+export interface PyProjectTomlNxConfig {
+  [key: string]: ServiceKind | string | number;
+  kind: ServiceKind;
+  port: number;
+  host: string;
+}
 
 /**
  * PyProject.toml file format.
@@ -40,6 +58,7 @@ export type PyProjectToml = {
         };
       };
     };
+    nx?: PyProjectTomlNxConfig;
   };
 };
 

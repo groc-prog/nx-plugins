@@ -20,9 +20,14 @@
       "default": ""
     },
     "port": {
-      "type": "string",
+      "type": "number",
       "description": "Port the application will run on.",
-      "default": "[::]:50051"
+      "default": 50051
+    },
+    "host": {
+      "type": "string",
+      "description": "Host the application will run on.",
+      "default": "[::]"
     },
     "includeDockerFile": {
       "type": "boolean",

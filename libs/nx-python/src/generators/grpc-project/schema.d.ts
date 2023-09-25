@@ -9,10 +9,15 @@ export interface GRPCProjectGeneratorSchema {
    */
   description: string;
   /**
-   * Port to run the FastAPI server on.
-   * @default '[::]:50051'
+   * Port to run the gRPC server on.
+   * @default 50051
    */
-  port: string;
+  port: number;
+  /**
+   * Host to run the gRPC server on.
+   * @default '[::]'
+   */
+  host: string;
   /**
    * Whether to include a Dockerfile.
    * @default true

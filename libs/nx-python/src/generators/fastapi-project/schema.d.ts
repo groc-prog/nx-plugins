@@ -14,6 +14,10 @@ export interface FastAPIProjectGeneratorSchema {
    */
   port: number;
   /**
+   * Host to run the FastAPI server on.
+   */
+  host: string;
+  /**
    * Whether to include a Dockerfile.
    * @default true
    */

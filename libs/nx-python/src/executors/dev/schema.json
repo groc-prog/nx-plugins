@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Starts the development server",
+  "description": "Starts a local development server. Only available for FastAPI and gRPC services.",
+  "type": "object",
+  "properties": {},
+  "required": []
+}
