@@ -81,6 +81,8 @@ There are also a few utility executors for linting, type-checking and formatting
 ## 🐳 Usage with docker <a name="usage-with-docker"></a>
 This monorepo provides a `custom script for pruning files for docker` under tools/docker/prune_monorepo.py. This allows for the final image to only contain the files which are actually needed for the application to work, which effectively minimizes the image size.
 
+> **Note**: When building the image, the `workspace root` must be passed as the `build context`. This is because we need to copy over the whole monorepo in order to prune and build it.
+
 Because this is a monorepo, we have to copy the whole workspace over into the docker environment so we can build the application and run it, which unnecessarily bloats the image with libraries and other applications. The solution: `Removing everything not needed for the application to work`.
 
 The script generates a `out` directory which only contains the application and libraries needed for the build. Then, with some more docker magic, the different environments for building the application (in this case a NodeJS environment for running NX and a Python for Poetry) are set up inside the docker container and your applications is ready to go.
