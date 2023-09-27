@@ -3,6 +3,12 @@
   "title": "Testing with pytest",
   "description": "Runs pytest in the current project or library.",
   "type": "object",
-  "properties": {},
+  "properties": {
+    "withCoverage": {
+      "type": "boolean",
+      "description": "Whether to enable test coverage.",
+      "default": false
+    }
+  },
   "required": []
 }

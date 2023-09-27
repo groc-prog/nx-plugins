@@ -1,3 +1,1 @@
-export interface BlackExecutorSchema {
-  [key: string]: unknown;
-}
+export interface BlackExecutorSchema {}

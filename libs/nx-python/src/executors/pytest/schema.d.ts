@@ -1,3 +1,7 @@
 export interface PytestExecutorSchema {
-  [key: string]: unknown;
+  /**
+   * Whether to enable coverage or not.
+   * @default false
+   */
+  withCoverage: boolean;
 }

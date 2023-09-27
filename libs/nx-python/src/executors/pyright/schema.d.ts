@@ -1,3 +1,1 @@
-export interface PyRightExecutorSchema {
-  [key: string]: unknown;
-}
+export interface PyRightExecutorSchema {}

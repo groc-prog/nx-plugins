@@ -1,5 +1,4 @@
 export interface BuildExecutorSchema {
-  [key: string]: unknown;
   /**
    * Paths to files/directories which will be ignored in the build step
    * @default []

@@ -33,7 +33,7 @@ export default async function executor(options: AddExecutorSchema, context: Exec
       runPoetry(['install', '--sync'], execOpts);
 
       // Add dependencies to implicitDependencies in project.json
-      console.log(chalk.dim(`Syncing implicit dependencies for project`));
+      console.log(chalk.dim('Syncing implicit dependencies for project'));
       const projectConfiguration: ProjectConfiguration = JSON.parse(
         fs.readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
       );

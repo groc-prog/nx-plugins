@@ -1,3 +1,1 @@
-export interface PylintExecutorSchema {
-  [key: string]: unknown;
-}
+export interface PylintExecutorSchema {}

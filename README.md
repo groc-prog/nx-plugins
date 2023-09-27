@@ -41,7 +41,7 @@ If any of these requirements are not met, the generator will throw an error and 
 #### Syncing the shared virtual environment
 Should you (for whatever reason) need to sync the shared virtual environment, you can do so by running the `install` executor in any of the projects. This will update the `pyproject.toml` and `poetry.lock` files in the root of your workspace to match the dependencies of the projects in your workspace.
 
-> **Note**: If you ever feel the need to manually update the `pyproject.toml` and `poetry.lock` anywhere, just know when the time comes, you will get a free trip to the gulag.
+> **Note**: If you ever feel the need to manually update the `pyproject.toml` and `poetry.lock` anywhere (in which case you are either fucking around where you shouldn't or just fucking stupid), don't forget to run `nx run <project>:lock` after.
 
 
 ## 📜 Executors
@@ -51,13 +51,13 @@ Like with generators, the `nx-python` library also provides a few executors to r
 ### Dependency management
 The following executors can be used to manage dependencies in your projects:
 
-- `nx run <project>:add`: Adds new dependencies to the project. If you want to add multiple dependencies, you can separate them with a comma. To add local libraries, you have to pass the `--local` flag.
-- `nx run <project>:remove`: Removes dependencies from the project. If you want to remove multiple dependencies, you can separate them with a comma. To remove local libraries, you have to pass the `--local` flag.
-- `nx run <project>:update`: Updates dependencies in the project. If you want to update multiple dependencies, you can separate them with a comma.
-- `nx run <project>:install`: Installs all dependencies in the project from the `poetry.lock` file.
-- `nx run <project>:lock`: Locks all dependencies in the project to the `poetry.lock` file.
+- `nx run <project>:add <args>`: Adds new dependencies to the project. If you want to add multiple dependencies, you can separate them with a comma. To add local libraries, you have to pass the `--local` flag. This executor accepts all flags which can be passed to `poetry's add` method.
+- `nx run <project>:remove`: Removes dependencies from the project. If you want to remove multiple dependencies, you can separate them with a comma. To remove local libraries, you have to pass the `--local` flag. This executor accepts all flags which can be passed to `poetry's remove` method.
+- `nx run <project>:update`: Updates dependencies in the project. If you want to update multiple dependencies, you can separate them with a comma. This executor accepts all flags which can be passed to `poetry's update` method.
+- `nx run <project>:install`: Installs all dependencies in the project from the `poetry.lock` file. This executor accepts all flags which can be passed to `poetry's install` method.
+- `nx run <project>:lock`: Locks all dependencies in the project to the `poetry.lock` file. This executor accepts all flags which can be passed to `poetry's lock` method.
 
-> **Note**: If you have a shared virtual environment, all of the above commands will also affect the `pyproject.toml` and `poetry.lock` files in the root of your workspace.
+> **Note**: If you have a shared virtual environment, all of the above commands will also affect the `pyproject.toml` and `poetry.lock` files in the root of your workspace. So should you find yourself in a situation where the shared virtual environment is out of sync, you can just run `nx run <project>:install` in any workspace.
 
 
 ### Development, testing and building applications
