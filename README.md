@@ -3,23 +3,25 @@ A monorepo using [Python Poetry](https://python-poetry.org/) and [NX](https://nx
 
 
 ## 🔧 IDE setup and tooling <a name="ide-setup-and-tooling"></a>
-NX provides special tooling which can be used with some IDE's to improve the development experience:
+NX provides special tooling which can be used with some IDE's to improve the development experience. This includes a UI for running commands, executors and generators. Here is a list of available plugins for different IDE's:
 
-- `VSCode`: A extension which provides a UI interface for running executor, generators, and much more. Get the extension [here](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console).
-- `Jetbrains`: Also provides a UI for working with NX commands. Get the extension [here](https://plugins.jetbrains.com/plugin/21060-nx-console) plugin.
+- `VSCode`: Get the extension [here](https://marketplace.visualstudio.com/items?itemName=nrwl.angular-console).
+- `Jetbrains`: Get the extension [here](https://plugins.jetbrains.com/plugin/21060-nx-console) plugin.
 
 
 ## 🚀 Generators
-The internal `nx-python` library provides a few generators quickly scaffold new projects, applications, and libraries. Here is a list of all available generators:
+The internal `nx-python` library provides a few generators to quickly scaffold new projects, applications, and libraries. Here is a list of all available generators:
 
 - `nx generate @nx-python-poetry/nx-python:poetry-project`: Creates a new poetry project. The project can either be a library or an application.
 - `nx generate @nx-python-poetry/nx-python:fastapi-project`: Creates a new FastAPI project with all the necessary dependencies and minimal configuration.
 - `nx generate @nx-python-poetry/nx-python:grpc-project`: Creates a new gRPC project with all the necessary dependencies and minimal configuration.
 - `nx generate @nx-python-poetry/nx-python:shared-virtual-environment`: Migrates the current NX workspace to a shared virtual environment.
 
+All generators come with pre-configured linting, type-checking, formatting and a testing. Both `FastAPI and gRPC` projects also provide a ready-to-go development server with HMR. The `shared-virtual-environment` generator is a bit special, so it will be explained in more detail in the section below.
 
-### Shared virtual environment - The deep dive
-The shared virtual environment allows you to work from the root of the workspace while still being able to start your services and libraries. This is achieved by creating a virtual environment in the root of the workspace and then linking all the services and libraries to it. This way you can use the same virtual environment for all your services and libraries.
+
+### Shared virtual environment - The deep dive <a name="shared-virtual-environment"></a>
+A shared virtual environment allows you to work from the root of the workspace while still being able to work with your services and libraries like before. This can also increase install times, since you only have to install the dependencies once.
 
 #### Changes to the workspace
 If you create a shared virtual environment using the `shared-virtual-environment` generator, the following changes will be applied to your workspace:
@@ -45,13 +47,13 @@ Should you (for whatever reason) need to sync the shared virtual environment, yo
 
 
 ## 📜 Executors
-Like with generators, the `nx-python` library also provides a few executors to run common tasks. The easiest way to use executors is by using the UI NX provides with plugins as described in the [`IDE setup and tooling`](#ide-setup-and-tooling) section. Here is a list of all available executors:
+Like with generators, the internal `nx-python` library also provides a few executors to run common tasks. The easiest way to use executors is by using the UI provided by NX with plugins as described in the [`IDE setup and tooling`](#ide-setup-and-tooling) section. Here is a list of all available executors:
 
 
 ### Dependency management
 The following executors can be used to manage dependencies in your projects:
 
-- `nx run <project>:add <args>`: Adds new dependencies to the project. If you want to add multiple dependencies, you can separate them with a comma. To add local libraries, you have to pass the `--local` flag. This executor accepts all flags which can be passed to `poetry's add` method.
+- `nx run <project>:add`: Adds new dependencies to the project. If you want to add multiple dependencies, you can separate them with a comma. To add local libraries, you have to pass the `--local` flag. This executor accepts all flags which can be passed to `poetry's add` method.
 - `nx run <project>:remove`: Removes dependencies from the project. If you want to remove multiple dependencies, you can separate them with a comma. To remove local libraries, you have to pass the `--local` flag. This executor accepts all flags which can be passed to `poetry's remove` method.
 - `nx run <project>:update`: Updates dependencies in the project. If you want to update multiple dependencies, you can separate them with a comma. This executor accepts all flags which can be passed to `poetry's update` method.
 - `nx run <project>:install`: Installs all dependencies in the project from the `poetry.lock` file. This executor accepts all flags which can be passed to `poetry's install` method.
@@ -60,14 +62,14 @@ The following executors can be used to manage dependencies in your projects:
 > **Note**: If you have a shared virtual environment, all of the above commands will also affect the `pyproject.toml` and `poetry.lock` files in the root of your workspace. So should you find yourself in a situation where the shared virtual environment is out of sync, you can just run `nx run <project>:install` in any workspace.
 
 
-### Development, testing and building applications
+### Developing, testing and building your project
 The following executors can be used to develop, test and build your projects:
 
 - `nx run <project>:build`: Builds the project and all of it's libraries into a single packaged application.
-- `nx run <project>:dev`: Starts a local development server with HMR enabled. This is only available for FastAPI and gRPC projects.
+- `nx run <project>:dev`: Starts a local development server with HMR enabled.
 - `nx run <project>:pytest`: Runs all tests under the `tests` directory using `pytest` as a test runner.
 
-> **Note**: The `build` executor is only available for projects of type `application` and the `dev` executor is only available for `FastAPI and gRPC services`.
+> **Note**: The `build` executor is only available for projects of type `application` and the `dev` executor is only available for `FastAPI and gRPC projects`.
 
 
 ### Utility executors
@@ -79,17 +81,15 @@ There are also a few utility executors for linting, type-checking and formatting
 
 
 ## 🐳 Usage with docker <a name="usage-with-docker"></a>
-This monorepo provides a `custom script for pruning files for docker` under tools/docker/prune_monorepo.py. This allows for the final image to only contain the files which are actually needed for the application to work, which effectively minimizes the image size.
+This monorepo provides a `pruning script` for smaller image sizes under **tools/docker/prune_monorepo.py**. This allows for the final image to only contain the files which are actually needed for the application to work, which effectively minimizes the image size.
 
 > **Note**: When building the image, the `workspace root` must be passed as the `build context`. This is because we need to copy over the whole monorepo in order to prune and build it.
 
-Because this is a monorepo, we have to copy the whole workspace over into the docker environment so we can build the application and run it, which unnecessarily bloats the image with libraries and other applications. The solution: `Removing everything not needed for the application to work`.
-
-The script generates a `out` directory which only contains the application and libraries needed for the build. Then, with some more docker magic, the different environments for building the application (in this case a NodeJS environment for running NX and a Python for Poetry) are set up inside the docker container and your applications is ready to go.
+Because this is a monorepo, the whole workspace is needed so we can build a project and run it, which unnecessarily bloats the image with libraries and other applications. Using the **prune_monorepo.py** script, a `out` directory is generated which only contains the application and libraries needed for the build. A dockerfile making use of this script can be automatically generated by passing the `--includeDockerFile` flag to the generator when creating a new FastAPI or gRPC project.
 
 
 ## 📊 Dependency visualization
-The `nx-python` library uses `implicitDependencies` for [`docker builds`](#usage-with-docker), which means it also enables the graph provided by NX to visualize the dependencies between python services/libraries. Just run the following code in the command line:
+The internal `nx-python` library uses `implicitDependencies` for [`docker builds`](#usage-with-docker), which means it also enables the graph provided by NX to visualize the dependencies between python projects. Just run the following code in the command line:
 
 ```bash
 nx graph
