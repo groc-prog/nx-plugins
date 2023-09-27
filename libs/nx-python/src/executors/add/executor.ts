@@ -78,6 +78,9 @@ export default async function executor(options: AddExecutorSchema, context: Exec
  * @returns {void}
  */
 function addLocalProject(context: ExecutorContext, dependencies: string[]): void {
+  if (dependencies.includes(context.projectsConfigurations.projects[context.projectName].name))
+    throw new Error('Cannot add project to itself.');
+
   // Get current pyproject.toml file path
   const projectPath = context.projectsConfigurations.projects[context.projectName];
   const projectTomlConfig = path.join(projectPath.root, 'pyproject.toml');
@@ -85,6 +88,7 @@ function addLocalProject(context: ExecutorContext, dependencies: string[]): void
   const projectTomlData = toml.parse(fs.readFileSync(projectTomlConfig, 'utf-8')) as PyProjectToml;
 
   // Add dependencies to pyproject.toml
+  console.log(chalk.dim('Checking if local dependency can be added'));
   dependencies.forEach((dependency) => {
     if (!context.projectsConfigurations.projects[dependency])
       throw new Error(`Project ${dependency} not found in Nx workspace.`);

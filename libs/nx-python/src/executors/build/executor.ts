@@ -27,7 +27,7 @@ export default async function executor(options: BuildExecutorSchema, context: Ex
     options.ignorePaths = [...IGNORED_PATHS, ...options.ignorePaths];
     options.ignorePaths = options.ignorePaths.map((ignorePath) => path.join(root, ignorePath));
 
-    console.log(chalk.dim(`Creating temporary directory ${tmpBuildFolderPath}`));
+    console.log(chalk.dim(`Creating temporary directory ${tmpBuildFolderPath}\n`));
     mkdirSync(tmpBuildFolderPath, { recursive: true });
     copySync(rootPath, tmpBuildFolderPath, { filter: (file) => !options.ignorePaths.includes(file) });
 
@@ -68,7 +68,7 @@ function resolveDependencies(
   buildFolderPath: string,
   projectPath: string
 ): void {
-  console.log(chalk.dim(`\nResolving dependencies for ${dependencyProjectPath}`));
+  console.log(chalk.dim(`Resolving dependencies for ${dependencyProjectPath}`));
   const dependencyPyProjectToml = path.join(dependencyProjectPath, 'pyproject.toml');
   const dependencyTomlData = parse(readFileSync(dependencyPyProjectToml).toString('utf-8')) as PyProjectToml;
 

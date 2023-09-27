@@ -12,5 +12,7 @@
       "description": "Dependencies to update."
     }
   },
-  "required": []
+  "required": [
+    "dependencies"
+  ]
 }
