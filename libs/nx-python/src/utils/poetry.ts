@@ -1,13 +1,13 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
 
+import { readFileSync, writeFileSync, existsSync } from 'fs-extra';
 import { get, isObject, set } from 'lodash';
 import chalk from 'chalk';
 import spawn from 'cross-spawn';
 import commandExists from 'command-exists';
 import toml from '@iarna/toml';
 import path from 'path';
-import fs from 'fs';
 
 /**
  * Supported service types for local development servers.
@@ -105,9 +105,9 @@ export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void 
 export function updateSharedEnvironment(context: ExecutorContext): void {
   const rootTomlPath = path.join(context.root, 'pyproject.toml');
 
-  if (fs.existsSync(rootTomlPath)) {
+  if (existsSync(rootTomlPath)) {
     console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} Updating shared virtual environment\n`));
-    const rootTomlConfig = toml.parse(fs.readFileSync(rootTomlPath, 'utf-8')) as PyProjectToml;
+    const rootTomlConfig = toml.parse(readFileSync(rootTomlPath, 'utf-8')) as PyProjectToml;
 
     // Reset dependencies so unused dependencies are removed
     rootTomlConfig.tool.poetry.dependencies = {};
@@ -118,13 +118,13 @@ export function updateSharedEnvironment(context: ExecutorContext): void {
       console.log(chalk.dim(`Checking ${project} for changes`));
       const projectTomlPath = path.join(context.projectsConfigurations.projects[project].root, 'pyproject.toml');
 
-      if (!fs.existsSync(projectTomlPath)) return;
+      if (!existsSync(projectTomlPath)) return;
 
-      const projectTomlConfig = toml.parse(fs.readFileSync(projectTomlPath, 'utf-8')) as PyProjectToml;
+      const projectTomlConfig = toml.parse(readFileSync(projectTomlPath, 'utf-8')) as PyProjectToml;
       addSharedDependencies(rootTomlConfig, projectTomlConfig);
     });
 
-    fs.writeFileSync(rootTomlPath, toml.stringify(rootTomlConfig));
+    writeFileSync(rootTomlPath, toml.stringify(rootTomlConfig));
     runPoetry(['lock'], {
       cwd: context.root,
       env: process.env,

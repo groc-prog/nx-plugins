@@ -3,8 +3,8 @@ import type { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
 import type { RemoveExecutorSchema } from './schema';
 
 import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
+import { readFileSync, writeFileSync } from 'fs-extra';
 import { omit } from 'lodash';
-import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 
@@ -53,12 +53,12 @@ export default async function executor(options: RemoveExecutorSchema, context: E
     if (options.local) {
       console.log(chalk.dim('Syncing implicit dependencies for project'));
       const projectConfiguration: ProjectConfiguration = JSON.parse(
-        fs.readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
+        readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
       );
       projectConfiguration.implicitDependencies = projectConfiguration.implicitDependencies.filter(
         (dependency) => !options.dependencies.includes(dependency)
       );
-      fs.writeFileSync(path.join(projectContext.root, 'project.json'), JSON.stringify(projectConfiguration, null, 2));
+      writeFileSync(path.join(projectContext.root, 'project.json'), JSON.stringify(projectConfiguration, null, 2));
     }
 
     updateSharedEnvironment(context);

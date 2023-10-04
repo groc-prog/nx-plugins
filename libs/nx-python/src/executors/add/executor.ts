@@ -4,10 +4,10 @@ import type { AddExecutorSchema } from './schema';
 import type { PyProjectToml } from '../../utils/poetry';
 
 import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
+import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
 import { isObject, union, omit } from 'lodash';
 import chalk from 'chalk';
 import toml from '@iarna/toml';
-import fs from 'fs';
 import path from 'path';
 
 export default async function executor(options: AddExecutorSchema, context: ExecutorContext) {
@@ -35,13 +35,13 @@ export default async function executor(options: AddExecutorSchema, context: Exec
       // Add dependencies to implicitDependencies in project.json
       console.log(chalk.dim('Syncing implicit dependencies for project'));
       const projectConfiguration: ProjectConfiguration = JSON.parse(
-        fs.readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
+        readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
       );
       projectConfiguration.implicitDependencies = union(
         projectConfiguration.implicitDependencies,
         options.dependencies
       );
-      fs.writeFileSync(path.join(projectContext.root, 'project.json'), JSON.stringify(projectConfiguration, null, 2));
+      writeFileSync(path.join(projectContext.root, 'project.json'), JSON.stringify(projectConfiguration, null, 2));
     } else {
       const addArgs = ['add'];
       const additionalArgs = omit(options, ['dependencies', 'local']);
@@ -85,7 +85,7 @@ function addLocalProject(context: ExecutorContext, dependencies: string[]): void
   const projectPath = context.projectsConfigurations.projects[context.projectName];
   const projectTomlConfig = path.join(projectPath.root, 'pyproject.toml');
 
-  const projectTomlData = toml.parse(fs.readFileSync(projectTomlConfig, 'utf-8')) as PyProjectToml;
+  const projectTomlData = toml.parse(readFileSync(projectTomlConfig, 'utf-8')) as PyProjectToml;
 
   // Add dependencies to pyproject.toml
   console.log(chalk.dim('Checking if local dependency can be added'));
@@ -105,9 +105,9 @@ function addLocalProject(context: ExecutorContext, dependencies: string[]): void
     // Add any local dependencies defined in dependency's pyproject.toml
     const dependencyTomlConfig = path.join(context.projectsConfigurations.projects[dependency].root, 'pyproject.toml');
 
-    if (!fs.existsSync(dependencyTomlConfig)) throw new Error(`Project ${dependency} not found in Nx workspace.`);
+    if (!existsSync(dependencyTomlConfig)) throw new Error(`Project ${dependency} not found in Nx workspace.`);
 
-    const dependencyTomlData = toml.parse(fs.readFileSync(dependencyTomlConfig, 'utf-8')) as PyProjectToml;
+    const dependencyTomlData = toml.parse(readFileSync(dependencyTomlConfig, 'utf-8')) as PyProjectToml;
 
     Object.keys(dependencyTomlData.tool.poetry.dependencies).forEach((dependencyName) => {
       if (isObject(dependencyTomlData.tool.poetry.dependencies[dependencyName])) {
@@ -118,6 +118,6 @@ function addLocalProject(context: ExecutorContext, dependencies: string[]): void
       }
     });
 
-    fs.writeFileSync(projectTomlConfig, toml.stringify(projectTomlData));
+    writeFileSync(projectTomlConfig, toml.stringify(projectTomlData));
   });
 }

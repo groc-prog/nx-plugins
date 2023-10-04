@@ -4,9 +4,9 @@ import type { DevExecutorSchema } from './schema';
 import type { PyProjectToml, PyProjectTomlNxConfig } from '../../utils/poetry';
 
 import { checkPoetryExecutable, runPoetry, ServiceKind } from '../../utils/poetry';
+import { readFileSync } from 'fs-extra';
 import chalk from 'chalk';
 import toml from '@iarna/toml';
-import fs from 'fs';
 import path from 'path';
 
 export default async function executor(options: DevExecutorSchema, context: ExecutorContext) {
@@ -83,7 +83,7 @@ export default async function executor(options: DevExecutorSchema, context: Exec
  */
 function getServiceType(projectContext: ProjectConfiguration): PyProjectTomlNxConfig {
   const projectTomlConfig = path.join(projectContext.root, 'pyproject.toml');
-  const projectTomlData = toml.parse(fs.readFileSync(projectTomlConfig, 'utf-8')) as PyProjectToml;
+  const projectTomlData = toml.parse(readFileSync(projectTomlConfig, 'utf-8')) as PyProjectToml;
 
   console.log(chalk.dim('Checking nx configuration for development server'));
   if (projectTomlData.tool.nx === undefined) throw new Error('Missing NX configuration in pyproject.toml file');
