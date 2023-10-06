@@ -42,7 +42,7 @@ RUN pip3 install "poetry==$POETRY_VERSION"
 
 # Base image for service runner
 # We don't need NX for running the service, so might as well leave it out
-FROM python:3.10-slim-bookworm as runner-base
+FROM python:3.10-slim-bookworm as poetry-base
 
 ENV PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
@@ -56,30 +56,25 @@ RUN echo "Installing poetry version $POETRY_VERSION"
 RUN pip install "poetry==$POETRY_VERSION"
 
 
-# Prune monorepo to only include the service/libs we want to build
-# Decreases final image size drastically the bigger the monorepo becomes
-FROM base AS prune
+# Copy over the whole monorepo and prune it so we have a `out` folder with only
+# the service and it's dependencies we want to build (see tools/docker/pruneMonorepo.mjs)
+FROM poetry-base AS prune
 WORKDIR /app
 
-ENV NX_PYTHON_POETRY_SERVICE="<%= projectName %>"
-
+# Copy over monorepo files and prune it
 COPY . .
-
-RUN echo "Pruning monorepo"
-RUN python tools/docker/prune_monorepo.py
+RUN python tools/docker/prune_monorepo.py --name="<%= projectName %>"
 
 
-# Install NX dependencies and build the artifacts for the service
-# Building the actual artefacts is handeled by the NX executor (see `libs/nx-python/executors/build`)
-FROM base AS builder
+FROM base as builder
 WORKDIR /app
 
-COPY --from=prune /app/out .
+COPY --from=prune /app/out/ .
 
 RUN echo "Installing NX dependencies"
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 
-RUN echo "Building artifacts"
+RUN echo "Running NX build command"
 RUN nx run <%= projectName %>:build
 
 RUN echo "Unpacking artifacts"
@@ -89,18 +84,25 @@ RUN tar -xzf /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0.tar.g
 RUN mv /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0 /app/services/<%= projectName %>/dist/<%= moduleName %>
 
 
-# Finally run the service, use base image for runner here since we don't need NX anymore
-FROM runner-base AS runner
+# Copy over the artifacts and install the dependencies
+FROM poetry-base as installer
 WORKDIR /app
 
-COPY --from=builder /app/services/<%= projectName %>/dist/<%= moduleName %> .
+COPY --from=builder /app/services/<%= projectName %>/dist/<%= moduleName %> ./
 
-RUN echo "Installing Python dependencies"
+RUN echo "Installing Poetry dependencies"
 RUN poetry config virtualenvs.create false
 RUN poetry install --without=dev --no-interaction --no-ansi
+
+
+# Run the service
+FROM poetry-base as runner
+WORKDIR /app
 
 RUN groupadd -g 999 appuser
 RUN useradd -r -u 999 -g appuser appuser
 USER appuser
+
+COPY --from=installer . .
 
 CMD ["uvicorn", "<%= moduleName %>.main:app", "--host", "<%= host %>", "--port", "<%= port %>"]
