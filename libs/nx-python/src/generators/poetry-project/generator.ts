@@ -46,19 +46,19 @@ export default async function generator(tree: Tree, schema: PoetryProjectGenerat
         executor: '@nx-python-poetry/nx-python:lock',
         options: {},
       },
-      black: {
+      format: {
         executor: '@nx-python-poetry/nx-python:black',
         options: {},
       },
-      pylint: {
+      lint: {
         executor: '@nx-python-poetry/nx-python:pylint',
         options: {},
       },
-      pyright: {
+      'type-check': {
         executor: '@nx-python-poetry/nx-python:pyright',
         options: {},
       },
-      pytest: {
+      test: {
         executor: '@nx-python-poetry/nx-python:pytest',
         options: {},
       },
