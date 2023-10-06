@@ -1,11 +1,22 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
-import type { PylintExecutorSchema } from './schema';
 
-import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
 import chalk from 'chalk';
 
-export default async function executor(options: PylintExecutorSchema, context: ExecutorContext) {
+import type { PylintExecutorSchema } from './schema';
+import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
+
+/**
+ * Lints the current project.
+ *
+ * @param {PylintExecutorSchema} options - Executor options
+ * @param {ExecutorContext} context - Executor context
+ * @returns {Promise<{ success: boolean }>} - Promise containing success status
+ */
+export default async function executor(
+  options: PylintExecutorSchema,
+  context: ExecutorContext,
+): Promise<{ success: boolean }> {
   process.chdir(context.root);
 
   try {

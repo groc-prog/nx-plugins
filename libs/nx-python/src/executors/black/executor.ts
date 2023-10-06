@@ -1,11 +1,22 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
-import type { BlackExecutorSchema } from './schema';
 
-import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
 import chalk from 'chalk';
 
-export default async function executor(options: BlackExecutorSchema, context: ExecutorContext) {
+import type { BlackExecutorSchema } from './schema';
+import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
+
+/**
+ * Formats the current project.
+ *
+ * @param {BlackExecutorSchema} options - Executor options
+ * @param {ExecutorContext} context - Executor context
+ * @returns {Promise<{ success: boolean }>} - Promise containing success status
+ */
+export default async function executor(
+  options: BlackExecutorSchema,
+  context: ExecutorContext,
+): Promise<{ success: boolean }> {
   process.chdir(context.root);
 
   try {

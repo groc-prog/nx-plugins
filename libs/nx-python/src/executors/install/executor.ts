@@ -1,11 +1,22 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
-import type { InstallExecutorSchema } from './schema';
 
-import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
 import chalk from 'chalk';
 
-export default async function executor(options: InstallExecutorSchema, context: ExecutorContext) {
+import type { InstallExecutorSchema } from './schema';
+import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
+
+/**
+ * Installs dependencies for the current project.
+ *
+ * @param {InstallExecutorSchema} options - Executor options
+ * @param {ExecutorContext} context - Executor context
+ * @returns {Promise<{ success: boolean }>} - Promise containing success status
+ */
+export default async function executor(
+  options: InstallExecutorSchema,
+  context: ExecutorContext,
+): Promise<{ success: boolean }> {
   process.chdir(context.root);
 
   try {
@@ -28,12 +39,12 @@ export default async function executor(options: InstallExecutorSchema, context: 
     updateSharedEnvironment(context);
 
     console.log(
-      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully installed dependencies for ${context.projectName}!`)
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully installed dependencies for ${context.projectName}!`),
     );
     return { success: true };
   } catch (error) {
     console.error(
-      chalk.red(`\n${chalk.bgRed(' ERROR ')}❌ Failed to install dependencies for ${context.projectName}!`)
+      chalk.red(`\n${chalk.bgRed(' ERROR ')}❌ Failed to install dependencies for ${context.projectName}!`),
     );
     console.error(chalk.red(`\n${error.message}`));
     return { success: false };

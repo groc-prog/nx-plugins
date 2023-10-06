@@ -67,7 +67,8 @@ export const POETRY_EXECUTABLE = 'poetry';
 /**
  * Checks if Poetry is installed.
  *
- * @throws {Error} If Poetry is not installed.
+ * @throws {Error} - If Poetry is not installed.
+ * @returns {Promise<void>} - Promise containing void.
  */
 export async function checkPoetryExecutable(): Promise<void> {
   try {
@@ -82,6 +83,8 @@ export async function checkPoetryExecutable(): Promise<void> {
  *
  * @param {string[]} args - Arguments to pass to poetry.
  * @param {SpawnSyncOptions} options - Options to pass to spawn.
+ * @throws {Error} - If poetry command fails.
+ * @returns {void}
  */
 export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void {
   const commandStr = `${POETRY_EXECUTABLE} ${args.join(' ')}`;
@@ -101,6 +104,7 @@ export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void 
  * Updates the shared virtual environment with the latest dependencies.
  *
  * @param {ExecutorContext} context - Executor context.
+ * @returns {void}
  */
 export function updateSharedEnvironment(context: ExecutorContext): void {
   const rootTomlPath = path.join(context.root, 'pyproject.toml');
@@ -143,7 +147,7 @@ export function updateSharedEnvironment(context: ExecutorContext): void {
  *
  * @param {PyProjectToml} rootTomlConfig - Root pyproject.toml file.
  * @param {PyProjectToml} projectTomlConfig - Project pyproject.toml file.
- * @throws {Error} If dependency version mismatch is detected.
+ * @throws {Error} - If dependency version mismatch is detected.
  */
 export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectTomlConfig: PyProjectToml): void {
   // Add shared dependencies
@@ -164,7 +168,7 @@ export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectToml
     if (rootDependency && projectDependency && rootDependency !== projectDependency)
       throw new Error(
         `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
-        and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
+        and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`,
       );
 
     if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;
@@ -192,7 +196,7 @@ export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectToml
       if (rootDependency && projectDependency && rootDependency !== projectDependency)
         throw new Error(
           `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
-          and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`
+          and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`,
         );
 
       if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;

@@ -1,14 +1,26 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
-import type { RemoveExecutorSchema } from './schema';
 
-import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
 import { readFileSync, writeFileSync } from 'fs-extra';
 import { omit } from 'lodash';
 import path from 'path';
 import chalk from 'chalk';
 
-export default async function executor(options: RemoveExecutorSchema, context: ExecutorContext) {
+import type { RemoveExecutorSchema } from './schema';
+import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
+
+/**
+ * Removes dependencies from the current project.
+ *
+ * @param {RemoveExecutorSchema} options - Executor options
+ * @param {ExecutorContext} context - Executor context
+ * @throws {Error} - If local dependencies are not found in the workspace
+ * @returns {Promise<{ success: boolean }>} - Promise containing success status
+ */
+export default async function executor(
+  options: RemoveExecutorSchema,
+  context: ExecutorContext,
+): Promise<{ success: boolean }> {
   process.chdir(context.root);
 
   try {
@@ -22,7 +34,7 @@ export default async function executor(options: RemoveExecutorSchema, context: E
     // Build provided arguments and add any additional arguments to the command
     removeArgs.push(
       ...options.dependencies,
-      ...Object.entries(additionalArgs).map(([key, value]) => `--${key}=${value}`)
+      ...Object.entries(additionalArgs).map(([key, value]) => `--${key}=${value}`),
     );
 
     const execOpts: SpawnSyncOptions = {
@@ -34,7 +46,7 @@ export default async function executor(options: RemoveExecutorSchema, context: E
       console.log(chalk.dim('Checking if local dependency can be removed'));
       options.dependencies.forEach((dependencyName) => {
         const exists = Object.keys(context.projectsConfigurations.projects).some(
-          (projectName) => projectName === dependencyName
+          (projectName) => projectName === dependencyName,
         );
 
         if (!exists) throw new Error(`Local dependency ${dependencyName} not found in NX workspace.`);
@@ -53,10 +65,10 @@ export default async function executor(options: RemoveExecutorSchema, context: E
     if (options.local) {
       console.log(chalk.dim('Syncing implicit dependencies for project'));
       const projectConfiguration: ProjectConfiguration = JSON.parse(
-        readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
+        readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8'),
       );
       projectConfiguration.implicitDependencies = projectConfiguration.implicitDependencies.filter(
-        (dependency) => !options.dependencies.includes(dependency)
+        (dependency) => !options.dependencies.includes(dependency),
       );
       writeFileSync(path.join(projectContext.root, 'project.json'), JSON.stringify(projectConfiguration, null, 2));
     }
@@ -64,12 +76,12 @@ export default async function executor(options: RemoveExecutorSchema, context: E
     updateSharedEnvironment(context);
 
     console.log(
-      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully removed dependencies from ${context.projectName}!`)
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully removed dependencies from ${context.projectName}!`),
     );
     return { success: true };
   } catch (error) {
     console.error(
-      chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to remove dependencies from ${context.projectName}!`)
+      chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to remove dependencies from ${context.projectName}!`),
     );
     console.error(chalk.red(`\n${error.message}`));
     return { success: false };

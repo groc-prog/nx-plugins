@@ -1,19 +1,30 @@
 import type { ExecutorContext } from '@nx/devkit';
-import type { BuildExecutorSchema } from './schema';
-import type { PyProjectToml } from '../../utils/poetry';
 
 import { copySync, readFileSync, mkdirSync, ensureDirSync, writeFileSync, removeSync } from 'fs-extra';
 import { parse, stringify } from '@iarna/toml';
-import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
 import { tmpdir } from 'os';
 import { v4 as uuidv4 } from 'uuid';
 import { isObject } from 'lodash';
 import chalk from 'chalk';
 import path from 'path';
 
+import type { BuildExecutorSchema } from './schema';
+import type { PyProjectToml } from '../../utils/poetry';
+import { checkPoetryExecutable, runPoetry } from '../../utils/poetry';
+
 const IGNORED_PATHS = ['.venv', 'build', 'tests', 'project.json'];
 
-export default async function executor(options: BuildExecutorSchema, context: ExecutorContext) {
+/**
+ * Builds the current project and all if it's local dependencies into a single wheel/package.
+ *
+ * @param {BuildExecutorSchema} options - Executor options
+ * @param {ExecutorContext} context - Executor context
+ * @returns {Promise<{ success: boolean }>} - Promise containing success status
+ */
+export default async function executor(
+  options: BuildExecutorSchema,
+  context: ExecutorContext,
+): Promise<{ success: boolean }> {
   try {
     await checkPoetryExecutable();
 
@@ -27,6 +38,8 @@ export default async function executor(options: BuildExecutorSchema, context: Ex
     options.ignorePaths = [...IGNORED_PATHS, ...options.ignorePaths];
     options.ignorePaths = options.ignorePaths.map((ignorePath) => path.join(root, ignorePath));
 
+    // Generate temporary build folder for the separate builds of the project and it's
+    // dependencies, then copy them over and build them all in the same folder
     console.log(chalk.dim(`Creating temporary directory ${tmpBuildFolderPath}\n`));
     mkdirSync(tmpBuildFolderPath, { recursive: true });
     copySync(rootPath, tmpBuildFolderPath, { filter: (file) => !options.ignorePaths.includes(file) });
@@ -61,12 +74,13 @@ export default async function executor(options: BuildExecutorSchema, context: Ex
  * @param {string} buildFolderPath - Path to the build folder
  * @param {string} projectPath - Path to the root of the project being built
  * @throws {Error} - If dependency versions mismatch
+ * @returns {void}
  */
 function resolveDependencies(
   pyProjectTomlData: PyProjectToml,
   dependencyProjectPath: string,
   buildFolderPath: string,
-  projectPath: string
+  projectPath: string,
 ): void {
   console.log(chalk.dim(`Resolving dependencies for ${dependencyProjectPath}`));
   const dependencyPyProjectToml = path.join(dependencyProjectPath, 'pyproject.toml');
@@ -79,6 +93,9 @@ function resolveDependencies(
     if (isObject(projectDependency) && projectDependency.path) {
       const newProjectPath = path.join(dependencyProjectPath, projectDependency.path);
 
+      // Resolve dependencies for the dependency project as well, since poetry does no work for use here.
+      // This makes this a bit more complicated, but it's the only way to ensure that all dependencies
+      // are resolved correctly.
       resolveDependencies(pyProjectTomlData, newProjectPath, buildFolderPath, projectPath);
       copyDependencyProject(pyProjectTomlData, dependencyName, newProjectPath, buildFolderPath);
 
@@ -86,7 +103,7 @@ function resolveDependencies(
     } else {
       if (buildDependency && buildDependency !== projectDependency)
         throw new Error(
-          `Dependency version mismatch for ${dependencyName}. Found versions ${projectDependency} and ${buildDependency}. Resolve the dependency conflict before proceeding.`
+          `Dependency version mismatch for ${dependencyName}. Found versions ${projectDependency} and ${buildDependency}. Resolve the dependency conflict before proceeding.`,
         );
 
       pyProjectTomlData.tool.poetry.dependencies[dependencyName] = projectDependency;
@@ -102,12 +119,13 @@ function resolveDependencies(
  * @param {string} dependencyName - Name of the dependency
  * @param {string} dependencyProjectPath - Path to the dependency project from the workspace root
  * @param {string} buildFolderPath - Path to the build folder
+ * @returns {void}
  */
 function copyDependencyProject(
   pyProjectTomlData: PyProjectToml,
   dependencyName: string,
   dependencyProjectPath: string,
-  buildFolderPath: string
+  buildFolderPath: string,
 ): void {
   const ignorePaths = IGNORED_PATHS.map((ignorePath) => path.join(dependencyProjectPath, ignorePath));
 

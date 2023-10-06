@@ -1,16 +1,27 @@
-import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
-import type { AddExecutorSchema } from './schema';
-import type { PyProjectToml } from '../../utils/poetry';
+import type { SpawnSyncOptions } from 'child_process';
 
-import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
 import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
 import { isObject, union, omit } from 'lodash';
 import chalk from 'chalk';
 import toml from '@iarna/toml';
 import path from 'path';
 
-export default async function executor(options: AddExecutorSchema, context: ExecutorContext) {
+import type { AddExecutorSchema } from './schema';
+import type { PyProjectToml } from '../../utils/poetry';
+import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
+
+/**
+ * Adds dependencies to the current project.
+ *
+ * @param {AddExecutorSchema} options - Executor options
+ * @param {ExecutorContext} context - Executor context
+ * @returns {Promise<{ success: boolean }>} - Promise containing success status
+ */
+export default async function executor(
+  options: AddExecutorSchema,
+  context: ExecutorContext,
+): Promise<{ success: boolean }> {
   process.chdir(context.root);
 
   try {
@@ -28,18 +39,18 @@ export default async function executor(options: AddExecutorSchema, context: Exec
       console.log(chalk.dim(`Adding local dependencies ${options.dependencies.join(', ')}`));
       addLocalProject(context, options.dependencies);
 
-      // Lock dependencies
       runPoetry(['lock'], execOpts);
       runPoetry(['install', '--sync'], execOpts);
 
       // Add dependencies to implicitDependencies in project.json
+      // Used in docker build and NX graph
       console.log(chalk.dim('Syncing implicit dependencies for project'));
       const projectConfiguration: ProjectConfiguration = JSON.parse(
-        readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8')
+        readFileSync(path.join(projectContext.root, 'project.json'), 'utf-8'),
       );
       projectConfiguration.implicitDependencies = union(
         projectConfiguration.implicitDependencies,
-        options.dependencies
+        options.dependencies,
       );
       writeFileSync(path.join(projectContext.root, 'project.json'), JSON.stringify(projectConfiguration, null, 2));
     } else {
@@ -49,7 +60,7 @@ export default async function executor(options: AddExecutorSchema, context: Exec
       // Build provided arguments and add any additional arguments to the command
       addArgs.push(
         ...options.dependencies,
-        ...Object.entries(additionalArgs).map(([key, value]) => `--${key}=${value}`)
+        ...Object.entries(additionalArgs).map(([key, value]) => `--${key}=${value}`),
       );
 
       console.log(chalk.dim(`Adding dependencies ${options.dependencies.join(', ')}`));
@@ -59,7 +70,7 @@ export default async function executor(options: AddExecutorSchema, context: Exec
     updateSharedEnvironment(context);
 
     console.log(
-      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully added dependencies to ${context.projectName}`)
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully added dependencies to ${context.projectName}`),
     );
     return { success: true };
   } catch (error) {
@@ -70,11 +81,12 @@ export default async function executor(options: AddExecutorSchema, context: Exec
 }
 
 /**
- * Adds dependencies to current projects pyproject.toml
+ * Adds dependencies to current projects pyproject.toml.
  *
  * @param {ExecutorContext} context - Executor context
  * @param {string[]} dependencies - Dependencies to add
- * @throws {Error} - Throws error if dependency is not found in the Nx workspace
+ * @throws {Error} - Throws error if project is not found in the Nx workspace
+ * @throws {Error} - Throws error if project is not a library
  * @returns {void}
  */
 function addLocalProject(context: ExecutorContext, dependencies: string[]): void {

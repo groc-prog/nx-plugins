@@ -1,11 +1,22 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
-import type { LockExecutorSchema } from './schema';
 
-import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
 import chalk from 'chalk';
 
-export default async function executor(options: LockExecutorSchema, context: ExecutorContext) {
+import type { LockExecutorSchema } from './schema';
+import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
+
+/**
+ * Updates the lockfile for the current project.
+ *
+ * @param {LockExecutorSchema} options - Executor options
+ * @param {ExecutorContext} context - Executor context
+ * @returns {Promise<{ success: boolean }>} - Promise containing success status
+ */
+export default async function executor(
+  options: LockExecutorSchema,
+  context: ExecutorContext,
+): Promise<{ success: boolean }> {
   process.chdir(context.root);
 
   try {
@@ -28,7 +39,7 @@ export default async function executor(options: LockExecutorSchema, context: Exe
     updateSharedEnvironment(context);
 
     console.log(
-      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully updated lockfile for ${context.projectName}!`)
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully updated lockfile for ${context.projectName}!`),
     );
     return { success: true };
   } catch (error) {

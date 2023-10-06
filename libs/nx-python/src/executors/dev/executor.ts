@@ -1,15 +1,27 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
-import type { DevExecutorSchema } from './schema';
-import type { PyProjectToml, PyProjectTomlNxConfig } from '../../utils/poetry';
 
-import { checkPoetryExecutable, runPoetry, ServiceKind } from '../../utils/poetry';
 import { readFileSync } from 'fs-extra';
 import chalk from 'chalk';
 import toml from '@iarna/toml';
 import path from 'path';
 
-export default async function executor(options: DevExecutorSchema, context: ExecutorContext) {
+import type { DevExecutorSchema } from './schema';
+import type { PyProjectToml, PyProjectTomlNxConfig } from '../../utils/poetry';
+import { checkPoetryExecutable, runPoetry, ServiceKind } from '../../utils/poetry';
+
+/**
+ * Starts the development server for the current project. Currently only supports FastAPI and gRPC.
+ *
+ * @param {DevExecutorSchema} options - Executor options
+ * @param {ExecutorContext} context - Executor context
+ * @throws {Error} - Unsupported service type
+ * @returns {Promise<{ success: boolean }>} - Promise containing success status
+ */
+export default async function executor(
+  options: DevExecutorSchema,
+  context: ExecutorContext,
+): Promise<{ success: boolean }> {
   process.chdir(context.root);
 
   try {
@@ -25,6 +37,9 @@ export default async function executor(options: DevExecutorSchema, context: Exec
       env: process.env,
     };
 
+    // Start development server based on the type of project which invoked the executor. This is done inside
+    // executor since there seems to be no better way of implementing HMR into gRPC services other than using
+    // watchmedo to restart the server on file changes.
     switch (nxDevConfig.kind) {
       case ServiceKind.FAST_API:
         console.log(chalk.dim('Identified as FastAPI service, starting development server with uvicorn'));
@@ -39,7 +54,7 @@ export default async function executor(options: DevExecutorSchema, context: Exec
             nxDevConfig.host,
             '--reload',
           ],
-          execOpts
+          execOpts,
         );
         break;
       case ServiceKind.GRPC:
@@ -57,7 +72,7 @@ export default async function executor(options: DevExecutorSchema, context: Exec
             'python',
             `${projectName}/main.py`,
           ],
-          execOpts
+          execOpts,
         );
         break;
       default:
@@ -65,7 +80,7 @@ export default async function executor(options: DevExecutorSchema, context: Exec
     }
 
     console.log(
-      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully added dependencies to ${context.projectName}`)
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully added dependencies to ${context.projectName}`),
     );
     return { success: true };
   } catch (error) {
@@ -79,6 +94,7 @@ export default async function executor(options: DevExecutorSchema, context: Exec
  * Checks for a nx configuration in the pyproject.toml file.
  *
  * @param {ProjectConfiguration} projectContext - Project configuration.
+ * @throws {Error} - If nx configuration is missing.
  * @returns {PyProjectTomlNxConfig} - Nx configuration for development server.
  */
 function getServiceType(projectContext: ProjectConfiguration): PyProjectTomlNxConfig {

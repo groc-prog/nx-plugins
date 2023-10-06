@@ -1,12 +1,23 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
-import type { UpdateExecutorSchema } from './schema';
 
-import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
 import { omit } from 'lodash';
 import chalk from 'chalk';
 
-export default async function executor(options: UpdateExecutorSchema, context: ExecutorContext) {
+import type { UpdateExecutorSchema } from './schema';
+import { checkPoetryExecutable, runPoetry, updateSharedEnvironment } from '../../utils/poetry';
+
+/**
+ * Updates dependencies for the current project.
+ *
+ * @param {UpdateExecutorSchema} options - Executor options
+ * @param {ExecutorContext} context - Executor context
+ * @returns {Promise<{ success: boolean }>} - Promise containing success status
+ */
+export default async function executor(
+  options: UpdateExecutorSchema,
+  context: ExecutorContext,
+): Promise<{ success: boolean }> {
   process.chdir(context.root);
 
   try {
@@ -20,7 +31,7 @@ export default async function executor(options: UpdateExecutorSchema, context: E
     // Build provided arguments and add any additional arguments to the command
     updateArgs.push(
       ...options.dependencies,
-      ...Object.entries(additionalArgs).map(([key, value]) => `--${key}=${value}`)
+      ...Object.entries(additionalArgs).map(([key, value]) => `--${key}=${value}`),
     );
 
     const execOpts: SpawnSyncOptions = {
@@ -34,7 +45,7 @@ export default async function executor(options: UpdateExecutorSchema, context: E
     updateSharedEnvironment(context);
 
     console.log(
-      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully updated dependencies in ${context.projectName}`)
+      chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully updated dependencies in ${context.projectName}`),
     );
     return { success: true };
   } catch (error) {
