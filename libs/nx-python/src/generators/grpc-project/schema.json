@@ -33,6 +33,26 @@
       "type": "boolean",
       "description": "Whether to generate a Docker file or not.",
       "default": true
+    },
+    "addBlack": {
+      "type": "boolean",
+      "description": "Add Black as a code formatter to the project.",
+      "default": true
+    },
+    "addPylint": {
+      "type": "boolean",
+      "description": "Add Pylint as a code linter to the project.",
+      "default": true
+    },
+    "addPytest": {
+      "type": "boolean",
+      "description": "Add Pytest as a test runner to the project.",
+      "default": true
+    },
+    "addPyright": {
+      "type": "boolean",
+      "description": "Add Pyright as a static type checker to the project.",
+      "default": true
     }
   },
   "required": [

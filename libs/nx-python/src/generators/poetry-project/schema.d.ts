@@ -13,4 +13,24 @@ export interface PoetryProjectGeneratorSchema {
    * @default ""
    */
   description: string;
+  /**
+   * Whether to add Black for code formatting.
+   * @default true
+   */
+  addBlack: boolean;
+  /**
+   * Whether to add Pylint for linting.
+   * @default true
+   */
+  addPylint: boolean;
+  /**
+   * Whether to add Pytest for testing.
+   * @default true
+   */
+  addPytest: boolean;
+  /**
+   * Whether to add Pyright for type checking.
+   * @default true
+   */
+  addPyright: boolean;
 }

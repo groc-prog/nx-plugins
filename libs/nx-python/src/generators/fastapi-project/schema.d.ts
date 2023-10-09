@@ -22,4 +22,12 @@ export interface FastAPIProjectGeneratorSchema {
    * @default true
    */
   includeDockerFile: boolean;
+  /**
+   * Options inherited from the Poetry project generator.
+   * @see {@link libs/nx-python/src/generators/poetry-project/schema.d.ts}
+   */
+  addBlack: boolean;
+  addPylint: boolean;
+  addPytest: boolean;
+  addPyright: boolean;
 }
