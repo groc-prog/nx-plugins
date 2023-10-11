@@ -1,8 +1,0 @@
-{
-  "$schema": "http://json-schema.org/schema",
-  "title": "Prunes the monorepo to only include the libs and apps needed for the current app.",
-  "description": "Creates a `out` directory at the root containing the pruned monorepo. Only useful in a docker environment.",
-  "type": "object",
-  "properties": {},
-  "required": []
-}

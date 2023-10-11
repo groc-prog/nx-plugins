@@ -10,9 +10,9 @@ export interface FastAPIProjectGeneratorSchema {
   description: string;
   /**
    * Port to run the FastAPI server on.
-   * @default 8000
+   * @default '8000'
    */
-  port: number;
+  port: string;
   /**
    * Host to run the FastAPI server on.
    */

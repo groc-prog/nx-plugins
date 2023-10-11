@@ -11,8 +11,8 @@ import { set } from 'lodash';
 import toml from '@iarna/toml';
 import path from 'path';
 
-import type { PoetryProjectGeneratorSchema } from './schema.d.ts';
-import type { PyProjectToml } from '../../utils/poetry.js';
+import type { PoetryProjectGeneratorSchema } from './schema';
+import type { PyProjectToml } from '../../utils/poetry';
 
 /**
  * Generates a new Poetry project.

@@ -10,9 +10,9 @@ export interface GRPCProjectGeneratorSchema {
   description: string;
   /**
    * Port to run the gRPC server on.
-   * @default 50051
+   * @default '50051'
    */
-  port: number;
+  port: string;
   /**
    * Host to run the gRPC server on.
    * @default '[::]'

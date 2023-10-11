@@ -9,9 +9,11 @@ import {
   workspaceLayout,
 } from '@nx/devkit';
 import { set } from 'lodash';
+import toml from '@iarna/toml';
 import path from 'path';
 
-import type { FastAPIProjectGeneratorSchema } from './schema.js';
+import type { FastAPIProjectGeneratorSchema } from './schema';
+import { PyProjectToml } from '../../utils/poetry';
 import * as poetryGenerator from '../poetry-project/generator';
 
 export default async function generator(tree: Tree, schema: FastAPIProjectGeneratorSchema) {
@@ -30,16 +32,20 @@ export default async function generator(tree: Tree, schema: FastAPIProjectGenera
     moduleName,
   });
 
+  const projectTomlConfig = tree.read(path.join(workspaceLayout().appsDir, projectName, 'pyproject.toml'), 'utf-8');
+  const projectTomlData = toml.parse(projectTomlConfig) as PyProjectToml;
+
+  set(projectTomlData, 'tool.nx', { port: schema.port, kind: 'fastapi', host: schema.host });
+  set(projectTomlData, 'tool.poetry.dependencies.fastapi', '*');
+  set(projectTomlData, 'tool.poetry.dependencies.uvicorn', '*');
+  tree.write(path.join(workspaceLayout().appsDir, projectName, 'pyproject.toml'), toml.stringify(projectTomlData));
+
   if (schema.includeDockerFile) {
     generateFiles(tree, path.join(__dirname, 'files', 'docker'), path.join(workspaceLayout().appsDir, projectName), {
       ...schema,
       projectName,
       moduleName,
       appsDir: workspaceLayout().appsDir,
-    });
-    set(projectConfiguration, 'targets.prune', {
-      executor: '@nx-python-poetry/nx-python:prune',
-      options: {},
     });
   }
 
