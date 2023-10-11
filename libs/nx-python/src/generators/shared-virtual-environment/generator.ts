@@ -21,23 +21,23 @@ export default async function generator(tree: Tree) {
   // Update dependencies in root pyproject.toml
   const rootTomlConfig = parse(tree.read('pyproject.toml').toString()) as PyProjectToml;
 
-  console.log(chalk.dim('\nAdding dependencies from services'));
+  console.log(chalk.dim(`\nAdding dependencies from ${workspaceLayout().appsDir}`));
   tree.children(workspaceLayout().appsDir).forEach((service) => {
     const projectTomlPath = path.join(workspaceLayout().appsDir, service, 'pyproject.toml');
 
     if (existsSync(projectTomlPath)) {
-      console.log(chalk.dim(`Resolving dependencies for service ${service}`));
+      console.log(chalk.dim(`Resolving dependencies for ${service}`));
       const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
       addSharedDependencies(rootTomlConfig, projectTomlConfig);
     }
   });
 
-  console.log(chalk.dim('\nAdding dependencies from libs'));
+  console.log(chalk.dim(`\nAdding dependencies from ${workspaceLayout().libsDir}`));
   tree.children(workspaceLayout().libsDir).forEach((lib) => {
     const projectTomlPath = path.join(workspaceLayout().libsDir, lib, 'pyproject.toml');
 
     if (existsSync(projectTomlPath)) {
-      console.log(chalk.dim(`Resolving dependencies for lib ${lib}`));
+      console.log(chalk.dim(`Resolving dependencies for ${lib}`));
       const projectTomlConfig = parse(tree.read(projectTomlPath).toString()) as PyProjectToml;
       addWorkspaceDependencies(rootTomlConfig, projectTomlConfig);
     }

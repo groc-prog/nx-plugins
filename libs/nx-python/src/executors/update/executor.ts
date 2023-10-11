@@ -1,6 +1,5 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext } from '@nx/devkit';
-
 import { omit } from 'lodash';
 import chalk from 'chalk';
 

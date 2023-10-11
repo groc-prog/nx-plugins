@@ -1,5 +1,4 @@
 import type { ExecutorContext } from '@nx/devkit';
-
 import { copySync, readFileSync, mkdirSync, ensureDirSync, writeFileSync, removeSync } from 'fs-extra';
 import { parse, stringify } from '@iarna/toml';
 import { tmpdir } from 'os';

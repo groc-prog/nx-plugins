@@ -1,6 +1,5 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
-
 import { readFileSync, writeFileSync } from 'fs-extra';
 import { omit } from 'lodash';
 import path from 'path';

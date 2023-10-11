@@ -1,6 +1,5 @@
 import type { SpawnSyncOptions } from 'child_process';
 import type { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
-
 import { readFileSync } from 'fs-extra';
 import chalk from 'chalk';
 import toml from '@iarna/toml';

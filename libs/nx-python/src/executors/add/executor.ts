@@ -1,6 +1,5 @@
 import type { ExecutorContext, ProjectConfiguration } from '@nx/devkit';
 import type { SpawnSyncOptions } from 'child_process';
-
 import { existsSync, readFileSync, writeFileSync } from 'fs-extra';
 import { isObject, union, omit } from 'lodash';
 import chalk from 'chalk';

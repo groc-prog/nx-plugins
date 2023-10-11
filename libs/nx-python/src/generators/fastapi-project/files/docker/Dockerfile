@@ -10,7 +10,7 @@ WORKDIR /app
 ENV PNPM_HOME=/usr/local/bin \
   PATH="$PATH:$PNPM_HOME" \
   NX_VERSION=16.3.2 \
-  PYTHON_VERSION=3.11.5-r0 \
+  PYTHON_VERSION=3.11.6-r0 \
   PYTHONFAULTHANDLER=1 \
   PYTHONUNBUFFERED=1 \
   PYTHONHASHSEED=random \
@@ -57,7 +57,7 @@ RUN pip install "poetry==$POETRY_VERSION"
 
 
 # Copy over the whole monorepo and prune it so we have a `out` folder with only
-# the service and it's dependencies we want to build (see tools/docker/pruneMonorepo.mjs)
+# the service and it's dependencies we want to build (see tools/docker/prune_monorepo.py)
 FROM poetry-base AS prune
 WORKDIR /app
 
@@ -66,6 +66,8 @@ COPY . .
 RUN python tools/docker/prune_monorepo.py --name="<%= projectName %>"
 
 
+# Install NX dependencies and build the artifacts for the service
+# Building the actual artefacts is handeled by the NX executor (see `libs/nx-python/executors/build`)
 FROM base as builder
 WORKDIR /app
 
@@ -84,7 +86,7 @@ RUN tar -xzf /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0.tar.g
 RUN mv /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0 /app/services/<%= projectName %>/dist/<%= moduleName %>
 
 
-# Copy over the artifacts and install the dependencies
+# Install the service dependencies for python
 FROM poetry-base as installer
 WORKDIR /app
 
@@ -95,7 +97,7 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --without=dev --no-interaction --no-ansi
 
 
-# Run the service
+# Finally run the service, use base image for runner here since we don't need NX anymore
 FROM poetry-base as runner
 WORKDIR /app
 
