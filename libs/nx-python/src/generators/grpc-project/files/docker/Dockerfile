@@ -71,13 +71,15 @@ RUN python tools/docker/prune_monorepo.py --name="<%= projectName %>"
 FROM base as builder
 WORKDIR /app
 
-COPY --from=prune /app/out/ .
+COPY --from=prune /app/out/nx .
 
 RUN echo "Installing NX dependencies"
 RUN pnpm install
 
+COPY --from=prune /app/out/full .
+
 RUN echo "Running NX build command"
-RUN nx run <%= projectName %>:build
+RUN nx run a:build
 
 RUN echo "Unpacking artifacts"
 RUN mkdir -p /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0
@@ -86,8 +88,8 @@ RUN tar -xzf /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0.tar.g
 RUN mv /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0 /app/services/<%= projectName %>/dist/<%= moduleName %>
 
 
-# Install the service dependencies for python
-FROM poetry-base as installer
+# Finally run the service, use base image for runner here since we don't need NX anymore
+FROM poetry-base AS runner
 WORKDIR /app
 
 COPY --from=builder /app/services/<%= projectName %>/dist/<%= moduleName %> ./
@@ -95,11 +97,6 @@ COPY --from=builder /app/services/<%= projectName %>/dist/<%= moduleName %> ./
 RUN echo "Installing Poetry dependencies"
 RUN poetry config virtualenvs.create false
 RUN poetry install --without=dev --no-interaction --no-ansi
-
-
-# Finally run the service, use base image for runner here since we don't need NX anymore
-FROM poetry-base AS runner
-WORKDIR /app
 
 RUN groupadd -g 999 appuser
 RUN useradd -r -u 999 -g appuser appuser
