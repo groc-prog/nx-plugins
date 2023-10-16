@@ -63,7 +63,7 @@ WORKDIR /app
 
 # Copy over monorepo files and prune it
 COPY . .
-RUN python tools/docker/prune_monorepo.py --name="<%= projectName %>"
+RUN python tools/prune_monorepo.py --scope="<%= projectName %>"
 
 
 # Install NX dependencies and build the artifacts for the service
