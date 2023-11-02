@@ -9,6 +9,30 @@ packages = [{ include = "<%= moduleName %>" }]
 [tool.poetry.dependencies]
 python = "^3.10"
 
+<% if (addBlack || addPylint || addPytest || addPyright) { %>
+[tool.poetry.group.dev.dependencies]
+  <% if (addBlack) { %>
+  black = "*"
+  <% } %>
+  <% if (addPylint) { %>
+  pylint = "*"
+  <% } %>
+  <% if (addPytest) { %>
+  pytest = "*"
+  pytest-cov = "*"
+  <% } %>
+  <% if (addPyright) { %>
+  pyright = "*"
+  <% } %>
+<% } %>
+
+<% if (addBlack) { %>
+[tool.black]
+line-length = 120
+target-version = ['py310', 'py311']
+workers = 4
+<% } %>
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
