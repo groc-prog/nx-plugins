@@ -2,7 +2,7 @@
 
 # Base image for building services with Python, Poetry and NX
 # We need both PNPM and Poetry for the build process since the nx executors internally call poetry commands
-FROM node:20-alpine AS base
+FROM node:20-alpine AS node-base
 RUN apk add --no-cache libc6-compat
 RUN apk update
 WORKDIR /app
@@ -56,27 +56,18 @@ RUN echo "Installing poetry version $POETRY_VERSION"
 RUN pip install "poetry==$POETRY_VERSION"
 
 
-# Copy over the whole monorepo and prune it so we have a `out` folder with only
-# the service and it's dependencies we want to build (see tools/docker/prune_monorepo.py)
-FROM poetry-base AS prune
-WORKDIR /app
-
-# Copy over monorepo files and prune it
-COPY . .
-RUN python tools/prune_monorepo.py --scope="<%= projectName %>"
-
-
 # Install NX dependencies and build the artifacts for the service
 # Building the actual artefacts is handeled by the NX executor (see `libs/nx-python/executors/build`)
-FROM base as builder
+FROM node-base as builder
 WORKDIR /app
 
-COPY --from=prune /app/out/nx .
+COPY package.json .
+COPY pnpm-lock.yaml .
 
 RUN echo "Installing NX dependencies"
 RUN pnpm install
 
-COPY --from=prune /app/out/full .
+COPY . .
 
 RUN echo "Running NX build command"
 RUN nx run a:build
