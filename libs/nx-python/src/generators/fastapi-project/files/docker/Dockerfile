@@ -70,7 +70,7 @@ RUN pnpm install
 COPY . .
 
 RUN echo "Running NX build command"
-RUN nx run a:build
+RUN nx run <%= projectName %>:build
 
 RUN echo "Unpacking artifacts"
 RUN mkdir -p /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0
