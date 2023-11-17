@@ -12,16 +12,16 @@ NX provides special tooling which can be used with some IDE's to improve the dev
 ## 🚀 Generators
 The internal `nx-python` library provides a few generators to quickly scaffold new projects, applications, and libraries. Here is a list of all available generators:
 
-- `nx generate @nx-python-poetry/nx-python:poetry-project`: Creates a new poetry project. The project can either be a library or an application.
-- `nx generate @nx-python-poetry/nx-python:fastapi-project`: Creates a new FastAPI project with all the necessary dependencies and minimal configuration.
-- `nx generate @nx-python-poetry/nx-python:grpc-project`: Creates a new gRPC project with all the necessary dependencies and minimal configuration.
-- `nx generate @nx-python-poetry/nx-python:shared-virtual-environment`: Migrates the current NX workspace to a shared virtual environment.
+- `nx generate @<workspace>/nx-python:poetry-project`: Creates a new poetry project. The project can either be a library or an application.
+- `nx generate @<workspace>/nx-python:fastapi-project`: Creates a new FastAPI project with all the necessary dependencies and minimal configuration.
+- `nx generate @<workspace>/nx-python:grpc-project`: Creates a new gRPC project with all the necessary dependencies and minimal configuration.
+- `nx generate @<workspace>/nx-python:shared-virtual-environment`: Migrates the current NX workspace to a shared virtual environment.
 
-All generators come with pre-configured linting, type-checking, formatting and a testing. Both `FastAPI and gRPC` projects also provide a ready-to-go development server with HMR. The `shared-virtual-environment` generator is a bit special, so it will be explained in more detail in the section below.
+All generators come with pre-configured linting, type-checking, formatting and testing. Both `FastAPI and gRPC` projects also provide a ready-to-go development server with HMR. The `shared-virtual-environment` generator is a bit special, so it will be explained in more detail in the section below.
 
 
 ### Shared virtual environment - The deep dive <a name="shared-virtual-environment"></a>
-A shared virtual environment allows you to work from the root of the workspace while still being able to work with your services and libraries like before. This can also increase install times, since you only have to install the dependencies once.
+A shared virtual environment allows you to work from the root of the workspace while still being able to work with your services and libraries like before. This can also decrease install times, since you only have to install the dependencies once.
 
 #### Changes to the workspace
 If you create a shared virtual environment using the `shared-virtual-environment` generator, the following changes will be applied to your workspace:
