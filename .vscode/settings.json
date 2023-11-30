@@ -1,0 +1,20 @@
+{
+  "python.testing.pytestArgs": [],
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "markdownlint.config": {
+    "MD033": false
+  },
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "**/node_modules": true,
+    "node_modules": true,
+    ".pytest_cache": true,
+    ".coverage": true
+  }
+}
