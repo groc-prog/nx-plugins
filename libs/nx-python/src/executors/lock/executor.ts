@@ -32,7 +32,6 @@ export default async function executor(
       env: process.env,
     };
 
-    console.log(chalk.dim('Updating lockfile'));
     runPoetry(lockArgs, execOpts);
 
     updateSharedEnvironment(context);

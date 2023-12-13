@@ -21,7 +21,7 @@ export default async function executor(
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')}🧹 Linting ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')}🧹 Linting ${context.projectName}`));
 
     const moduleName = context.projectName.replace('-', '_');
 

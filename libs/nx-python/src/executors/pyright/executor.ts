@@ -21,7 +21,7 @@ export default async function executor(
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🔍 Type-checking ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🔍 Type-checking ${context.projectName}`));
 
     const execOpts: SpawnSyncOptions = {
       cwd: projectContext.root,

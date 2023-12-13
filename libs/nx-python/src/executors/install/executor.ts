@@ -32,7 +32,6 @@ export default async function executor(
       env: process.env,
     };
 
-    console.log(chalk.dim('Installing dependencies ...'));
     runPoetry(installArgs, execOpts);
 
     updateSharedEnvironment(context);

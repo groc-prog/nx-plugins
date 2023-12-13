@@ -21,7 +21,7 @@ export default async function generator(tree: Tree) {
   // Update dependencies in root pyproject.toml
   const rootTomlConfig = parse(tree.read('pyproject.toml').toString()) as PyProjectToml;
 
-  console.log(chalk.dim(`\nAdding dependencies from ${workspaceLayout().appsDir}`));
+  console.log(chalk.dim(`Adding dependencies from ${workspaceLayout().appsDir}`));
   tree.children(workspaceLayout().appsDir).forEach((service) => {
     const projectTomlPath = path.join(workspaceLayout().appsDir, service, 'pyproject.toml');
 
@@ -32,7 +32,7 @@ export default async function generator(tree: Tree) {
     }
   });
 
-  console.log(chalk.dim(`\nAdding dependencies from ${workspaceLayout().libsDir}`));
+  console.log(chalk.dim(`Adding dependencies from ${workspaceLayout().libsDir}`));
   tree.children(workspaceLayout().libsDir).forEach((lib) => {
     const projectTomlPath = path.join(workspaceLayout().libsDir, lib, 'pyproject.toml');
 

@@ -39,7 +39,7 @@ export default async function executor(
 
     // Generate temporary build folder for the separate builds of the project and it's
     // dependencies, then copy them over and build them all in the same folder
-    console.log(chalk.dim(`Creating temporary directory ${tmpBuildFolderPath}\n`));
+    console.log(chalk.dim(`Creating temporary directory ${tmpBuildFolderPath}`));
     mkdirSync(tmpBuildFolderPath, { recursive: true });
     copySync(rootPath, tmpBuildFolderPath, { filter: (file) => !options.ignorePaths.includes(file) });
 
@@ -49,7 +49,7 @@ export default async function executor(
     resolveDependencies(buildTomlData, rootPath, tmpBuildFolderPath, rootPath);
     writeFileSync(buildPyProjectToml, stringify(buildTomlData));
 
-    console.log(chalk.dim('\nBuilding artifacts...'));
+    console.log(chalk.dim('Building artifacts...'));
     runPoetry(['build'], { cwd: tmpBuildFolderPath, env: process.env });
 
     ensureDirSync(buildFolderPath);
