@@ -70,6 +70,7 @@ export default async function generator(tree: Tree, schema: PoetryProjectGenerat
   generateFiles(tree, path.join(__dirname, 'files', 'base'), target, {
     description: schema.description,
     projectName,
+    isLib: schema.type === 'library',
     moduleName: projectName.replace('-', '_'),
   });
 
