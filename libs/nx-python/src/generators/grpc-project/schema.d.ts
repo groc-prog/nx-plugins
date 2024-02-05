@@ -1,13 +1,6 @@
-export interface GRPCProjectGeneratorSchema {
-  /**
-   * Name of the project.
-   */
-  name: string;
-  /**
-   * Description of the project.
-   * @default ''
-   */
-  description: string;
+import type { PoetryProjectGeneratorSchema } from '../poetry-project/schema';
+
+export interface GRPCProjectGeneratorSchema extends Omit<PoetryProjectGeneratorSchema, 'type'> {
   /**
    * Port to run the gRPC server on.
    * @default '50051'
@@ -23,12 +16,4 @@ export interface GRPCProjectGeneratorSchema {
    * @default true
    */
   includeDockerFile: boolean;
-  /**
-   * Options inherited from the Poetry project generator.
-   * @see {@link libs/nx-python/src/generators/poetry-project/schema.d.ts}
-   */
-  addBlack: boolean;
-  addPylint: boolean;
-  addPytest: boolean;
-  addPyright: boolean;
 }

@@ -33,4 +33,9 @@ export interface PoetryProjectGeneratorSchema {
    * @default true
    */
   addPyright: boolean;
+  /**
+   * Whether to add addIsort for import sorting.
+   * @default true
+   */
+  addIsort: boolean;
 }

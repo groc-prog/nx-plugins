@@ -121,7 +121,9 @@ function addLocalProject(context: ExecutorContext, dependencies: string[]): void
     const dependencyTomlData = toml.parse(readFileSync(dependencyTomlConfig, 'utf-8')) as PyProjectToml;
 
     Object.keys(dependencyTomlData.tool.poetry.dependencies).forEach((dependencyName) => {
-      if (isObject(dependencyTomlData.tool.poetry.dependencies[dependencyName])) {
+      const dependency = dependencyTomlData.tool.poetry.dependencies[dependencyName];
+
+      if (isObject(dependency) && dependency.path) {
         projectTomlData.tool.poetry.dependencies[dependencyName] = {
           path: path.relative(projectPath.root, `libs/${dependencyName}`),
           develop: true,

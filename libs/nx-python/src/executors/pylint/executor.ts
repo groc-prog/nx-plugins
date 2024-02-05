@@ -21,7 +21,7 @@ export default async function executor(
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')}🧹 Linting ${context.projectName}`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🧹 Linting ${context.projectName}`));
 
     const moduleName = context.projectName.replace('-', '_');
 
@@ -34,7 +34,7 @@ export default async function executor(
     console.log(chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully linted ${context.projectName}`));
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')}❌ Failed to lint ${context.projectName}`));
+    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to lint ${context.projectName}`));
     console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }

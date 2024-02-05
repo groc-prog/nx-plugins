@@ -7,7 +7,7 @@ import path from 'path';
 import chalk from 'chalk';
 
 import type { PyProjectToml } from '../../utils/poetry';
-import { runPoetry, addSharedDependencies } from '../../utils/poetry';
+import { runPoetry, addSharedDependencies, checkVersionCompatible } from '../../utils/poetry';
 
 export default async function generator(tree: Tree) {
   process.chdir(tree.root);
@@ -68,7 +68,7 @@ function addWorkspaceDependencies(rootTomlConfig: PyProjectToml, projectTomlConf
     const rootDependency = rootTomlConfig.tool.poetry.dependencies[dependencyName];
     const projectDependency = projectTomlConfig.tool.poetry.dependencies[dependencyName];
 
-    if (isObject(projectDependency)) {
+    if (isObject(projectDependency) && projectDependency.path) {
       if (rootDependency === undefined)
         rootTomlConfig.tool.poetry.dependencies[dependencyName] = {
           develop: true,
@@ -78,10 +78,17 @@ function addWorkspaceDependencies(rootTomlConfig: PyProjectToml, projectTomlConf
       return;
     }
 
-    if (rootDependency && projectDependency && rootDependency !== projectDependency)
+    if (
+      rootDependency &&
+      projectDependency &&
+      !checkVersionCompatible(rootDependency, projectDependency, dependencyName)
+    )
       throw new Error(
-        `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
-        and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`,
+        `Dependency version mismatch for ${dependencyName}. Got version ${
+          isObject(projectDependency) ? projectDependency.version : projectDependency
+        } in ${projectTomlConfig.tool.poetry.name} and ${
+          isObject(rootDependency) ? rootDependency.version : rootDependency
+        } in shared virtual environment. Resolve the dependency conflict before proceeding.`,
       );
 
     if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;
@@ -96,7 +103,7 @@ function addWorkspaceDependencies(rootTomlConfig: PyProjectToml, projectTomlConf
       const rootDependency = rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
       const projectDependency = projectTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
 
-      if (isObject(projectDependency)) {
+      if (isObject(projectDependency) && projectDependency.path) {
         if (rootDependency === undefined)
           rootTomlConfig.tool.poetry.dependencies[dependencyName] = {
             develop: true,
@@ -106,10 +113,17 @@ function addWorkspaceDependencies(rootTomlConfig: PyProjectToml, projectTomlConf
         return;
       }
 
-      if (rootDependency && projectDependency && rootDependency !== projectDependency)
+      if (
+        rootDependency &&
+        projectDependency &&
+        !checkVersionCompatible(rootDependency, projectDependency, dependencyName)
+      )
         throw new Error(
-          `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
-          and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`,
+          `Dependency version mismatch for ${dependencyName}. Got version ${
+            isObject(projectDependency) ? projectDependency.version : projectDependency
+          } in ${projectTomlConfig.tool.poetry.name} and ${
+            isObject(rootDependency) ? rootDependency.version : rootDependency
+          } in shared virtual environment. Resolve the dependency conflict before proceeding.`,
         );
 
       if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;

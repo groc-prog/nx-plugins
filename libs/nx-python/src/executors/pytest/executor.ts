@@ -21,7 +21,7 @@ export default async function executor(
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')}🔍 Running tests in ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🔍 Running tests in ${context.projectName}\n`));
 
     const moduleName = context.projectName.replace('-', '_');
 
@@ -41,7 +41,7 @@ export default async function executor(
     console.log(chalk.green(`\n${chalk.bgGreen(' SUCCESS ')} 🎉 Successfully ran tests in ${context.projectName}`));
     return { success: true };
   } catch (error) {
-    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')}❌ Failed to finish tests in ${context.projectName}`));
+    console.error(chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to finish tests in ${context.projectName}`));
     console.error(chalk.red(`\n${error.message}`));
     return { success: false };
   }

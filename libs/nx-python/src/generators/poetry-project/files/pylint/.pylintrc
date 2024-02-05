@@ -7,6 +7,8 @@ unsafe-load-any-extension=no
 
 [MESSAGES CONTROL]
 disable=abstract-method,
+        protected-access,
+        ungrouped-imports,
         bare-except,
         no-self-argument,
         keyword-arg-before-vararg,
@@ -106,6 +108,7 @@ disable=abstract-method,
         wrong-import-order,
         xrange-builtin,
         zip-builtin-not-iterating,
+        import-outside-toplevel,
 
 
 [REPORTS]

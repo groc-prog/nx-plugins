@@ -47,6 +47,11 @@
       "type": "boolean",
       "description": "Add Pyright as a static type checker to the project.",
       "default": true
+    },
+    "addIsort": {
+      "type": "boolean",
+      "description": "Add Isort for automatic import sorting to the project.",
+      "default": true
     }
   },
   "required": [

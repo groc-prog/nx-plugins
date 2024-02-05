@@ -8,6 +8,7 @@ import spawn from 'cross-spawn';
 import commandExists from 'command-exists';
 import toml from '@iarna/toml';
 import path from 'path';
+import * as semver from 'semver';
 
 /**
  * Supported service types for local development servers.
@@ -21,7 +22,7 @@ export enum ServiceKind {
  * PyProject.toml dependency. Can be a string or an object with path and develop properties if
  * it is a lib.
  */
-export type PyProjectTomlDependency = string | { path?: string; develop?: boolean };
+export type PyProjectTomlDependency = string | { path?: string; develop?: boolean; version?: string };
 
 /**
  * PyProject.toml dependencies.
@@ -48,6 +49,10 @@ export type PyProjectToml = {
     poetry?: {
       name: string;
       version: string;
+      source?: {
+        name: string;
+        url: string;
+      }[];
       packages?: Array<{
         include: string;
       }>;
@@ -94,7 +99,6 @@ export function runPoetry(args: string[], options: SpawnSyncOptions = {}): void 
     ...options,
     shell: false,
     stdio: 'inherit',
-    maxBuffer: 1024 * 1024 * 10,
   });
 
   if (result.status !== 0) throw new Error(`${commandStr} command failed with exit code ${result.status}`);
@@ -155,7 +159,7 @@ export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectToml
     const rootDependency = rootTomlConfig.tool.poetry.dependencies[dependencyName];
     const projectDependency = projectTomlConfig.tool.poetry.dependencies[dependencyName];
 
-    if (isObject(projectDependency)) {
+    if (isObject(projectDependency) && projectDependency.path) {
       if (rootDependency === undefined)
         rootTomlConfig.tool.poetry.dependencies[dependencyName] = {
           develop: true,
@@ -165,10 +169,17 @@ export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectToml
       return;
     }
 
-    if (rootDependency && projectDependency && rootDependency !== projectDependency)
+    if (
+      rootDependency &&
+      projectDependency &&
+      !checkVersionCompatible(rootDependency, projectDependency, dependencyName)
+    )
       throw new Error(
-        `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
-        and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`,
+        `Dependency version mismatch for ${dependencyName}. Got version ${
+          isObject(projectDependency) ? projectDependency.version : projectDependency
+        } in ${projectTomlConfig.tool.poetry.name} and ${
+          isObject(rootDependency) ? rootDependency.version : rootDependency
+        } in shared virtual environment. Resolve the dependency conflict before proceeding.`,
       );
 
     if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;
@@ -183,7 +194,7 @@ export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectToml
       const rootDependency = rootTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
       const projectDependency = projectTomlConfig.tool.poetry.group.dev.dependencies[dependencyName];
 
-      if (isObject(projectDependency)) {
+      if (isObject(projectDependency) && projectDependency.path) {
         if (rootDependency === undefined)
           rootTomlConfig.tool.poetry.dependencies[dependencyName] = {
             develop: true,
@@ -193,13 +204,76 @@ export function addSharedDependencies(rootTomlConfig: PyProjectToml, projectToml
         return;
       }
 
-      if (rootDependency && projectDependency && rootDependency !== projectDependency)
+      if (
+        rootDependency &&
+        projectDependency &&
+        !checkVersionCompatible(rootDependency, projectDependency, dependencyName)
+      )
         throw new Error(
-          `Dependency version mismatch for ${dependencyName}. Got version ${projectDependency} in ${projectTomlConfig.tool.poetry.name}
-          and ${rootDependency} in shared virtual environment. Resolve the dependency conflict before proceeding.`,
+          `Dependency version mismatch for ${dependencyName}. Got version ${
+            isObject(projectDependency) ? projectDependency.version : projectDependency
+          } in ${projectTomlConfig.tool.poetry.name} and ${
+            isObject(rootDependency) ? rootDependency.version : rootDependency
+          } in shared virtual environment. Resolve the dependency conflict before proceeding.`,
         );
 
       if (rootDependency === undefined) rootTomlConfig.tool.poetry.dependencies[dependencyName] = projectDependency;
     });
   }
+
+  if (get(projectTomlConfig, 'tool.poetry.source', null) !== null) {
+    if (get(rootTomlConfig, 'tool.poetry.source', null) === null) set(rootTomlConfig, 'tool.poetry.source', []);
+
+    const rootTomlSources: string[] = get(rootTomlConfig, 'tool.poetry.source', []).map((source) => source.name);
+    projectTomlConfig.tool.poetry.source.forEach((source) => {
+      if (!rootTomlSources.includes(source.name)) rootTomlConfig.tool.poetry.source.push(source);
+    });
+  }
+}
+
+/**
+ * Checks if 2 given versions are compatible.
+ *
+ * @param {PyProjectTomlDependency} rootDependency - Root dependency version in the format <MAJOR>.<MINOR>.<PATCH>.
+ * @param {PyProjectTomlDependency} projectDependency - Project dependency version in the format <MAJOR>.<MINOR>.<PATCH>.
+ * @param {string} dependencyName - The name of the dependency.
+ * @returns {boolean} True if versions are compatible, false otherwise.
+ */
+export function checkVersionCompatible(
+  rootDependency: PyProjectTomlDependency,
+  projectDependency: PyProjectTomlDependency,
+  dependencyName: string,
+): boolean {
+  let rootDependencyVersion = typeof rootDependency === 'string' ? rootDependency : rootDependency.version;
+  let projectDependencyVersion = typeof projectDependency === 'string' ? projectDependency : projectDependency.version;
+
+  console.log(
+    chalk.dim(
+      `Checking compatibility between ${dependencyName} versions ${rootDependencyVersion} and ${projectDependencyVersion}`,
+    ),
+  );
+  if (rootDependencyVersion === undefined || projectDependencyVersion === undefined) return false;
+  if (rootDependencyVersion === '*' || projectDependencyVersion === '*') return true;
+
+  rootDependencyVersion = rootDependencyVersion.replace(/,/g, ' ');
+  projectDependencyVersion = projectDependencyVersion.replace(/,/g, ' ');
+
+  const rootDependencyRange = semver.validRange(rootDependencyVersion);
+  const projectDependencyRange = semver.validRange(projectDependencyVersion);
+
+  if (rootDependencyRange === null || projectDependencyRange === null) {
+    console.warn(
+      chalk.yellow(
+        `\n${chalk.bgYellow(
+          ' WARN ',
+        )} Unprocessable version numbers ${rootDependencyVersion} and ${projectDependencyVersion} encountered for ${dependencyName}, skipping`,
+      ),
+    );
+    return true;
+  }
+
+  return (
+    semver.intersects(rootDependencyRange, projectDependencyRange) &&
+    semver.intersects(projectDependencyRange, rootDependencyRange)
+  );
 }

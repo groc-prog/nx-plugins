@@ -2,7 +2,7 @@
 
 # To start the build process, we need both PNPM and poetry
 # This stage sets them up for us to use later
-FROM alpine:latest AS builder-base
+FROM alpine:latest AS installer-base
 
 RUN echo "Setting up build environment"
 RUN apk update
@@ -29,20 +29,31 @@ RUN poetry --version
 
 # Install NX dependencies and build the artifacts for the service
 # Building the actual artefacts is handled by the NX executor (see `libs/nx-python/executors/build`)
-FROM builder-base as builder
+FROM installer-base as installer
 WORKDIR /app
 
 RUN echo "Setting up NX workspace"
+ENV PNPM_HOME=/usr/local/bin
+ENV PATH="${PATH}:${PNPM_HOME}"
+
 COPY package.json .
 COPY pnpm-lock.yaml .
 
 RUN echo "Installing workspace dependencies"
 RUN pnpm install
+RUN pnpm add -g nx
 
-COPY . .
+# Copy the rest of the files and build the service
+FROM installer AS builder
+WORKDIR /app
+
+COPY nx.json .
+COPY tsconfig.base.json .
+COPY ./services/<%= projectName %> ./services/<%= projectName %>
+COPY ./libs ./libs
 
 RUN echo "Building application"
-RUN pnpx nx run <%= projectName %>:build
+RUN nx run <%= projectName %>:build
 
 RUN echo "Unpacking build artifacts"
 RUN mkdir -p /app/services/<%= projectName %>/dist/<%= moduleName %>-0.0.0
@@ -58,6 +69,10 @@ WORKDIR /app
 COPY --from=builder /app/services/<%= projectName %>/dist/<%= moduleName %> ./
 
 RUN echo "Installing runtime dependencies"
+ARG GITLAB_PACKAGE_USERNAME=0
+ARG GITLAB_PACKAGE_TOKEN=0
+
+RUN poetry config -- http-basic.monconhub $GITLAB_PACKAGE_USERNAME $GITLAB_PACKAGE_TOKEN
 RUN poetry config virtualenvs.create false
 RUN poetry install --without=dev --no-interaction --no-ansi
 

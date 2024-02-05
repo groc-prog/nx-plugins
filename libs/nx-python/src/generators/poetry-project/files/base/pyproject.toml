@@ -9,6 +9,10 @@ packages = [{ include = "<%= moduleName %>" }]
 [tool.poetry.dependencies]
 python = "^3.10"
 
+[[tool.poetry.source]]
+name = "monconhub"
+url = "https://gitlab.int.moncon.at/api/v4/projects/11/packages/pypi/simple"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

@@ -114,6 +114,8 @@ export default async function generator(tree: Tree, schema: PoetryProjectGenerat
     });
   }
 
+  if (schema.addIsort) set(projectTomlData, 'tool.poetry.group.dev.dependencies.isort', '*');
+
   tree.write(path.join(target, 'pyproject.toml'), toml.stringify(projectTomlData));
   addProjectConfiguration(tree, projectName, projectConfiguration);
 

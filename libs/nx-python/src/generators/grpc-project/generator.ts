@@ -38,7 +38,6 @@ export default async function generator(tree: Tree, schema: GRPCProjectGenerator
   set(projectTomlData, 'tool.nx', { port: schema.port, kind: 'grpc', host: schema.host });
   set(projectTomlData, 'tool.poetry.dependencies.grpcio', '*');
   set(projectTomlData, 'tool.poetry.dependencies.grpcio-reflection', '*');
-  set(projectTomlData, 'tool.poetry.dependencies.protobuf', '*');
   set(projectTomlData, 'tool.poetry.group.dev.dependencies.watchdog', '*');
   tree.write(path.join(workspaceLayout().appsDir, projectName, 'pyproject.toml'), toml.stringify(projectTomlData));
 

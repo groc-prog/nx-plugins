@@ -21,7 +21,7 @@ export default async function executor(
   try {
     await checkPoetryExecutable();
     const projectContext = context.projectsConfigurations.projects[context.projectName];
-    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')}🚀 Installing dependencies for ${context.projectName}\n`));
+    console.log(chalk.blue(`\n${chalk.bgBlue(' INFO ')} 🚀 Installing dependencies for ${context.projectName}\n`));
 
     // Add any additional arguments to the command
     const installArgs = ['install'];
@@ -42,7 +42,7 @@ export default async function executor(
     return { success: true };
   } catch (error) {
     console.error(
-      chalk.red(`\n${chalk.bgRed(' ERROR ')}❌ Failed to install dependencies for ${context.projectName}!`),
+      chalk.red(`\n${chalk.bgRed(' ERROR ')} ❌ Failed to install dependencies for ${context.projectName}!`),
     );
     console.error(chalk.red(`\n${error.message}`));
     return { success: false };
