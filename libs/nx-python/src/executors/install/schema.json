@@ -1,8 +1,0 @@
-{
-  "$schema": "http://json-schema.org/schema",
-  "title": "Installs dependencies defined in pyproject.toml.",
-  "description": "Runs `poetry install <args>` in the current project or library.",
-  "type": "object",
-  "properties": {},
-  "required": []
-}

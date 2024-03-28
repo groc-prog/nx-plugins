@@ -6,6 +6,8 @@
     "declaration": false,
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "es2015",
@@ -15,9 +17,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@nx-python-poetry/a-b": ["libs/a-b/src/index.ts"],
-      "@nx-python-poetry/my-plugin": ["libs/my-plugin/src/index.ts"],
-      "@nx-python-poetry/nx-python": ["libs/nx-python/src/index.ts"]
+      "@groc-prog/nx-python-poetry": ["packages/nx-python-poetry/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

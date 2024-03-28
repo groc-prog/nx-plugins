@@ -1,0 +1,51 @@
+{
+  "name": "nx-python-poetry",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/nx-python-poetry/src",
+  "projectType": "library",
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/packages/nx-python-poetry",
+        "main": "packages/nx-python-poetry/src/index.ts",
+        "tsConfig": "packages/nx-python-poetry/tsconfig.lib.json",
+        "assets": [
+          "packages/nx-python-poetry/*.md",
+          {
+            "input": "./packages/nx-python-poetry/src",
+            "glob": "**/!(*.ts)",
+            "output": "./src"
+          },
+          {
+            "input": "./packages/nx-python-poetry/src",
+            "glob": "**/*.d.ts",
+            "output": "./src"
+          },
+          {
+            "input": "./packages/nx-python-poetry",
+            "glob": "generators.json",
+            "output": "."
+          },
+          {
+            "input": "./packages/nx-python-poetry",
+            "glob": "executors.json",
+            "output": "."
+          }
+        ]
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    },
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "packages/nx-python-poetry/jest.config.ts"
+      }
+    }
+  }
+}

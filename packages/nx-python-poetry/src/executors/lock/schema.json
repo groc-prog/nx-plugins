@@ -1,0 +1,13 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Locks the dependencies of the project or library.",
+  "description": "Runs `poetry lock <args>` in the current project or library.",
+  "type": "object",
+  "properties": {
+    "args": {
+      "type": "string",
+      "description": "Additional arguments passed to the lock command. These arguments are passed as-is to `poetry lock`."
+    }
+  },
+  "required": []
+}

@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "PoetryProject",
+  "title": "Generate a new Python project using Poetry.",
+  "description": "Generates a new Poetry project with minimal configuration.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the project",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What name would you like to use?"
+    },
+    "type": {
+      "type": "string",
+      "description": "The type of project to create. Either 'application' or 'library'.",
+      "default": "application",
+      "enum": [
+        "application",
+        "library"
+      ]
+    },
+    "description": {
+      "type": "string",
+      "description": "Description added to the project's pyproject.toml file.",
+      "default": ""
+    },
+    "addBlack": {
+      "type": "boolean",
+      "description": "Add Black as a code formatter to the project.",
+      "default": false
+    },
+    "addPylint": {
+      "type": "boolean",
+      "description": "Add Pylint as a code linter to the project.",
+      "default": false
+    },
+    "addPytest": {
+      "type": "boolean",
+      "description": "Add Pytest as a test runner to the project.",
+      "default": false
+    },
+    "addPyright": {
+      "type": "boolean",
+      "description": "Add Pyright as a static type checker to the project.",
+      "default": false
+    },
+    "addIsort": {
+      "type": "boolean",
+      "description": "Add Isort for automatic import sorting to the project.",
+      "default": false
+    },
+    "addDockerfile": {
+      "type": "boolean",
+      "description": "Add a Dockerfile and docker-build executor to the project.",
+      "default": false
+    }
+  },
+  "required": [
+    "name",
+    "type"
+  ]
+}

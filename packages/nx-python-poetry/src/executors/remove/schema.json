@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Remove dependencies from the project.",
+  "description": "Runs `poetry remove <dependencies> <args>` in the current project or library. When removing local dependencies, the `--local` has to be set to `true`.",
+  "type": "object",
+  "properties": {
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dependencies to remove."
+    },
+    "local": {
+      "type": "boolean",
+      "description": "Whether the dependencies are local libraries or not.",
+      "default": false
+    },
+    "args": {
+      "type": "string",
+      "description": "Additional arguments passed to the remove command. These arguments are passed as-is to `poetry remove`."
+    }
+  },
+  "required": [
+    "dependencies"
+  ]
+}

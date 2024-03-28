@@ -1,0 +1,32 @@
+{
+  "name": "@groc-prog/nx-python-poetry",
+  "version": "0.0.1",
+  "dependencies": {
+    "@iarna/toml": "^2.2.5",
+    "@nx/devkit": "18.1.2",
+    "chalk": "^4.1.1",
+    "command-exists": "^1.2.9",
+    "cross-spawn": "^7.0.3",
+    "fs-extra": "^11.2.0",
+    "lodash": "^4.17.21",
+    "semver": "^7.6.0",
+    "tslib": "^2.3.0",
+    "uuid": "^9.0.1",
+    "yargs": "^17.7.2"
+  },
+  "devDependencies": {
+    "@types/command-exists": "^1.2.3",
+    "@types/cross-spawn": "^6.0.6",
+    "@types/fs-extra": "^11.0.4",
+    "@types/lodash": "^4.17.0",
+    "@types/semver": "^7.5.8",
+    "@types/uuid": "^9.0.8",
+    "@types/yargs": "^17.0.32"
+  },
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "typings": "./src/index.d.ts",
+  "private": true,
+  "executors": "./executors.json",
+  "generators": "./generators.json"
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Updates dependencies in a project.",
+  "description": "Runs `poetry update <dependencies> <args>` in the current project or library.",
+  "type": "object",
+  "properties": {
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dependencies to update."
+    },
+    "args": {
+      "type": "string",
+      "description": "Additional arguments passed to the update command. These arguments are passed as-is to `poetry update`."
+    }
+  },
+  "required": [
+    "dependencies"
+  ]
+}

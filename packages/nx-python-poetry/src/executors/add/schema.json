@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "title": "Add dependencies to a project or library",
+  "description": "Runs `poetry add <dependencies> <args>` in the current project or library. You can either install dependencies as usual or from local libraries (in which case you need to set the `--local` argument to `true`).",
+  "type": "object",
+  "properties": {
+    "dependencies": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Dependencies to install."
+    },
+    "local": {
+      "type": "boolean",
+      "description": "Whether the dependencies are local libraries or not.",
+      "default": false
+    },
+    "args": {
+      "type": "string",
+      "description": "Additional arguments passed to the add command. These arguments are passed as-is to `poetry add`."
+    }
+  },
+  "required": [
+    "dependencies"
+  ]
+}
